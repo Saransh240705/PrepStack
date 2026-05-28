@@ -50,70 +50,12 @@ export default function MyGroupsPage() {
       });
       if (res.ok) {
         const data = await res.json();
-        if (data.length === 0) {
-          await seedDefaultGroups(token, userEmail);
-        } else {
-          setGroups(data);
-        }
+        setGroups(data);
       }
     } catch (err) {
       console.error("Failed to fetch groups:", err);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const seedDefaultGroups = async (token: string, userEmail: string) => {
-    const defaultGroups = [
-      {
-        name: "Class X-A Science",
-        subject: "Biology & Physics",
-        grade: "Grade 10",
-        studentsCount: 38,
-        activeAssignments: 2,
-        averageScore: "84%",
-        color: "from-[#FF7950] to-[#FF5C35]",
-      },
-      {
-        name: "Grade VIII English",
-        subject: "Literature & Grammar",
-        grade: "Class VIII",
-        studentsCount: 42,
-        activeAssignments: 1,
-        averageScore: "79%",
-        color: "from-indigo-500 to-purple-600",
-      },
-      {
-        name: "Class IX Physics",
-        subject: "Kinematics & Thermodynamics",
-        grade: "Grade 9",
-        studentsCount: 35,
-        activeAssignments: 3,
-        averageScore: "88%",
-        color: "from-emerald-400 to-teal-600",
-      },
-    ];
-
-    try {
-      const seeded: Group[] = [];
-      for (const group of defaultGroups) {
-        const res = await fetch(`${BACKEND_URL}/api/groups`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`,
-            "x-user-email": userEmail
-          },
-          body: JSON.stringify(group)
-        });
-        if (res.ok) {
-          const newGroup = await res.json();
-          seeded.push(newGroup);
-        }
-      }
-      setGroups(seeded);
-    } catch (err) {
-      console.error("Failed seeding default groups:", err);
     }
   };
 

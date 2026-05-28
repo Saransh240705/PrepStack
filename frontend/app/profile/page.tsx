@@ -28,9 +28,9 @@ export default function ProfilePage() {
   };
 
   // Profile Form States
-  const [userName, setUserName] = useState("John Doe");
-  const [schoolName, setSchoolName] = useState("Delhi Public School");
-  const [schoolAddress, setSchoolAddress] = useState("Bokaro Steel City");
+  const [userName, setUserName] = useState("");
+  const [schoolName, setSchoolName] = useState("");
+  const [schoolAddress, setSchoolAddress] = useState("");
   const [avatar, setAvatar] = useState("/Avatar.jpg");
 
   // Status flags

@@ -74,7 +74,7 @@ export default function AssignmentOutputPage({ params }: PageProps) {
   >("pending");
   const [loading, setLoading] = useState(true);
   const [progressStep, setProgressStep] = useState(0);
-  const [schoolName, setSchoolName] = useState("Delhi Public School");
+  const [schoolName, setSchoolName] = useState("");
 
   const progressSteps = [
     "Submitting request to VedaAI generation queue...",

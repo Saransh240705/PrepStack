@@ -82,9 +82,6 @@ export default function MyLibraryPage() {
 
       if (resTemplates.ok) {
         let templates = await resTemplates.json();
-        if (templates.length === 0) {
-          templates = await seedDefaultTemplates(token, userEmail);
-        }
         
         templates.forEach((t: any) => {
           items.push({
@@ -105,48 +102,6 @@ export default function MyLibraryPage() {
       console.error("Failed to fetch library assignments:", err);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const seedDefaultTemplates = async (token: string, userEmail: string) => {
-    const defaultTemplates = [
-      {
-        title: "Standard Science MCQ Grading Rubric",
-        subject: "Physics/Chemistry/Biology",
-        questionsCount: 15,
-        totalMarks: 15,
-        size: "48 KB"
-      },
-      {
-        title: "High School English Essay Criteria Matrix",
-        subject: "English Literature",
-        questionsCount: 5,
-        totalMarks: 20,
-        size: "120 KB"
-      }
-    ];
-
-    try {
-      const seeded = [];
-      for (const temp of defaultTemplates) {
-        const res = await fetch(`${BACKEND_URL}/api/templates`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`,
-            "x-user-email": userEmail
-          },
-          body: JSON.stringify(temp)
-        });
-        if (res.ok) {
-          const newTemp = await res.json();
-          seeded.push(newTemp);
-        }
-      }
-      return seeded;
-    } catch (err) {
-      console.error("Failed seeding default templates:", err);
-      return [];
     }
   };
 
