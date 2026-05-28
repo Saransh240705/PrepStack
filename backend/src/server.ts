@@ -10,6 +10,7 @@ import "./workers/generationWorker";
 import uploadRoute from "./routes/upload.route";
 import authRoutes from "./routes/auth.route";
 import groupRoutes from "./routes/groups.route";
+import templateRoutes from "./routes/templates.route";
 
 const app = express();
 app.use(
@@ -26,6 +27,7 @@ app.use("/api/assignments", assignmentRoutes);
 app.use("/api/papers", papersRoute);
 app.use("/api/upload", uploadRoute);
 app.use("/api/groups", groupRoutes);
+app.use("/api/templates", templateRoutes);
 
 const server = http.createServer(app);
 

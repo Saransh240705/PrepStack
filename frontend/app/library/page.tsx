@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Folder, Search, FileText, Download, Trash2, ArrowUpRight, Grid, List, Sparkles, Loader2 } from "lucide-react";
-import Image from "next/image";
+import { Folder, Search, FileText, Download, Trash2, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { BACKEND_URL } from "../config";
 
@@ -31,17 +30,25 @@ export default function MyLibraryPage() {
     try {
       const token = localStorage.getItem("vedaai_auth_token") || "";
       const userEmail = localStorage.getItem("vedaai_user_email") || "";
-      const res = await fetch(`${BACKEND_URL}/api/assignments`, {
+      
+      const resAssignments = await fetch(`${BACKEND_URL}/api/assignments`, {
         headers: {
           "Authorization": `Bearer ${token}`,
           "x-user-email": userEmail
         }
       });
-      if (res.ok) {
-        const data = await res.json();
-        
-        // Map assignments to SavedItem schema
-        const items: SavedItem[] = [];
+      
+      const resTemplates = await fetch(`${BACKEND_URL}/api/templates`, {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "x-user-email": userEmail
+        }
+      });
+
+      const items: SavedItem[] = [];
+
+      if (resAssignments.ok) {
+        const data = await resAssignments.json();
         data.forEach((a: any) => {
           // Add generated paper as a "Saved Paper" item
           items.push({
@@ -56,7 +63,7 @@ export default function MyLibraryPage() {
             link: `/assignment/${a._id}`
           });
           
-          // If the assignment has a uploaded file, add it as a "Curriculum Material" item!
+          // If the assignment has a uploaded file, add it as a "Curriculum Material" item
           if (a.fileUrl) {
             items.push({
               id: `${a._id}_file`,
@@ -71,44 +78,75 @@ export default function MyLibraryPage() {
             });
           }
         });
-        
-        // Seed some highly realistic grading rubrics inside grading templates unique to the user
-        const storedTemplates = localStorage.getItem(`vedaai_templates_${userEmail}`);
-        if (storedTemplates) {
-          items.push(...JSON.parse(storedTemplates));
-        } else {
-          const defaultTemplates = [
-            {
-              id: "t1",
-              title: "Standard Science MCQ Grading Rubric",
-              type: "Grading Templates",
-              subject: "Physics/Chemistry/Biology",
-              questionsCount: 15,
-              totalMarks: 15,
-              savedDate: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
-              size: "48 KB"
-            },
-            {
-              id: "t2",
-              title: "High School English Essay Criteria Matrix",
-              type: "Grading Templates",
-              subject: "English Literature",
-              questionsCount: 5,
-              totalMarks: 20,
-              savedDate: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
-              size: "120 KB"
-            }
-          ];
-          localStorage.setItem(`vedaai_templates_${userEmail}`, JSON.stringify(defaultTemplates));
-          items.push(...defaultTemplates);
+      }
+
+      if (resTemplates.ok) {
+        let templates = await resTemplates.json();
+        if (templates.length === 0) {
+          templates = await seedDefaultTemplates(token, userEmail);
         }
         
-        setSavedItems(items);
+        templates.forEach((t: any) => {
+          items.push({
+            id: t._id || t.id,
+            title: t.title,
+            type: "Grading Templates",
+            subject: t.subject,
+            questionsCount: t.questionsCount,
+            totalMarks: t.totalMarks,
+            savedDate: new Date(t.createdAt || Date.now()).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+            size: t.size
+          });
+        });
       }
+
+      setSavedItems(items);
     } catch (err) {
       console.error("Failed to fetch library assignments:", err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const seedDefaultTemplates = async (token: string, userEmail: string) => {
+    const defaultTemplates = [
+      {
+        title: "Standard Science MCQ Grading Rubric",
+        subject: "Physics/Chemistry/Biology",
+        questionsCount: 15,
+        totalMarks: 15,
+        size: "48 KB"
+      },
+      {
+        title: "High School English Essay Criteria Matrix",
+        subject: "English Literature",
+        questionsCount: 5,
+        totalMarks: 20,
+        size: "120 KB"
+      }
+    ];
+
+    try {
+      const seeded = [];
+      for (const temp of defaultTemplates) {
+        const res = await fetch(`${BACKEND_URL}/api/templates`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+            "x-user-email": userEmail
+          },
+          body: JSON.stringify(temp)
+        });
+        if (res.ok) {
+          const newTemp = await res.json();
+          seeded.push(newTemp);
+        }
+      }
+      return seeded;
+    } catch (err) {
+      console.error("Failed seeding default templates:", err);
+      return [];
     }
   };
 
@@ -117,11 +155,12 @@ export default function MyLibraryPage() {
   }, []);
 
   const handleDelete = async (id: string, type: string) => {
-    if (!confirm(`Are you sure you want to delete this ${type === "Saved Papers" ? "assignment paper" : "material"}?`)) return;
+    if (!confirm(`Are you sure you want to delete this ${type === "Saved Papers" ? "assignment paper" : type === "Grading Templates" ? "grading template" : "material"}?`)) return;
     
+    const token = localStorage.getItem("vedaai_auth_token") || "";
+
     if (type === "Saved Papers") {
       try {
-        const token = localStorage.getItem("vedaai_auth_token") || "";
         const res = await fetch(`${BACKEND_URL}/api/assignments/${id}`, {
           method: "DELETE",
           headers: {
@@ -135,6 +174,22 @@ export default function MyLibraryPage() {
         }
       } catch (err) {
         console.error("Failed deleting assignment:", err);
+      }
+    } else if (type === "Grading Templates") {
+      try {
+        const res = await fetch(`${BACKEND_URL}/api/templates/${id}`, {
+          method: "DELETE",
+          headers: {
+            "Authorization": `Bearer ${token}`
+          }
+        });
+        if (res.ok) {
+          setSavedItems((prev) => prev.filter((item) => item.id !== id));
+        } else {
+          alert("Failed to delete template from database.");
+        }
+      } catch (err) {
+        console.error("Failed deleting grading template:", err);
       }
     } else {
       setSavedItems((prev) => prev.filter((item) => item.id !== id));
@@ -155,6 +210,15 @@ export default function MyLibraryPage() {
     const matchesTab = activeTab === "All Files" || item.type === activeTab;
     return matchesSearch && matchesTab;
   });
+
+  if (loading) {
+    return (
+      <div className="lg:ml-84 lg:w-[70rem] w-full px-4 lg:px-0 py-24 flex flex-col items-center justify-center min-h-[50vh] font-bricolage text-black">
+        <Loader2 className="w-10 h-10 animate-spin text-[#FF7950] mb-4" />
+        <p className="font-semibold text-zinc-500 animate-pulse">Loading dynamic library items...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="lg:ml-84 lg:w-[70rem] w-full px-4 lg:px-0 py-4 lg:py-6 font-bricolage text-black min-h-[85vh] pb-24 relative flex flex-col gap-5 lg:gap-6">
@@ -215,7 +279,10 @@ export default function MyLibraryPage() {
               className="bg-white rounded-3xl p-5 border border-zinc-200/50 shadow-[0_4px_30px_rgba(0,0,0,0.01)] hover:shadow-[0_8px_40px_rgba(0,0,0,0.03)] transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4"
             >
               {/* File Icon & Info block */}
-              <div className="flex items-start gap-4 min-w-0">
+              <div 
+                onClick={() => handleItemClick(item)}
+                className="flex items-start gap-4 min-w-0 flex-1 cursor-pointer"
+              >
                 <div className="p-3.5 rounded-2xl bg-zinc-50 border border-zinc-100 text-zinc-700 shadow-sm shrink-0">
                   <FileText className="w-6 h-6 stroke-[1.8]" />
                 </div>
@@ -240,11 +307,19 @@ export default function MyLibraryPage() {
               {/* Action Toolbar */}
               <div className="flex items-center gap-3 shrink-0 self-end sm:self-auto">
                 <span className="text-zinc-400 text-xs font-semibold mr-1">{item.size}</span>
-                <button className="p-2.5 bg-zinc-50 border border-zinc-200 text-zinc-700 hover:text-zinc-900 rounded-full hover:scale-105 active:scale-95 transition-all shadow-sm cursor-pointer">
-                  <Download className="w-4 h-4" />
-                </button>
+                {item.link && (
+                  <a 
+                    href={item.link} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    download
+                    className="p-2.5 bg-zinc-50 border border-zinc-200 text-zinc-700 hover:text-zinc-900 rounded-full hover:scale-105 active:scale-95 transition-all shadow-sm cursor-pointer"
+                  >
+                    <Download className="w-4 h-4" />
+                  </a>
+                )}
                 <button
-                  onClick={() => handleDelete(item.id)}
+                  onClick={() => handleDelete(item.id, item.type)}
                   className="p-2.5 bg-rose-50/50 border border-rose-100 text-rose-500 hover:text-rose-600 rounded-full hover:scale-105 active:scale-95 transition-all shadow-sm cursor-pointer"
                 >
                   <Trash2 className="w-4 h-4" />
