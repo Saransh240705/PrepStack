@@ -14,7 +14,7 @@ publisher = new Redis({
   maxRetriesPerRequest: null,
 });
 
-publisher.on("error", (err) => {
+publisher.on("error", (err: any) => {
   console.error("Redis Publisher Error:", err);
 });
 
@@ -26,7 +26,7 @@ export const setupSocket = (server: HttpServer) => {
     },
   });
 
-  io.on("connection", (socket) => {
+  io.on("connection", (socket: any) => {
     console.log("Client connected:", socket.id);
     socket.on("disconnect", () => {
       console.log("Client Disconnected", socket.id);
@@ -40,11 +40,11 @@ export const setupSocket = (server: HttpServer) => {
     maxRetriesPerRequest: null,
   });
 
-  subscriber.on("error", (err) => {
+  subscriber.on("error", (err: any) => {
     console.error("Redis Subscriber Error:", err);
   });
 
-  subscriber.subscribe("socket-events", (err) => {
+  subscriber.subscribe("socket-events", (err: any) => {
     if (err) {
       console.error("Failed to subscribe to socket-events channel:", err);
     } else {
@@ -52,7 +52,7 @@ export const setupSocket = (server: HttpServer) => {
     }
   });
 
-  subscriber.on("message", (channel, message) => {
+  subscriber.on("message", (channel: string, message: string) => {
     if (channel === "socket-events") {
       try {
         const { event, data } = JSON.parse(message);
@@ -74,7 +74,7 @@ export const getIO = () => {
   return {
     emit: (event: string, data: any) => {
       publisher.publish("socket-events", JSON.stringify({ event, data }))
-        .catch((err) => {
+        .catch((err: any) => {
           console.error("Failed to publish socket event to Redis:", err);
           // Fallback to local emission if io is available
           if (io) {

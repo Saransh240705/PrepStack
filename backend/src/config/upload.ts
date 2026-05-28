@@ -19,7 +19,7 @@ export const upload = multer({
     limits: {
         fileSize: 20*1024*1024   
     },
-    fileFilter: (_req, file, cb) => {
+    fileFilter: (_req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
         const ext = path.extname(file.originalname).toLowerCase();
         if (ALLOWED_EXTENSIONS.includes(ext)) {
             cb(null, true);
