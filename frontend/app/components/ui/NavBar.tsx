@@ -19,6 +19,35 @@ const NavBar = () => {
   const [userName, setUserName] = useState("John Doe");
   const [avatar, setAvatar] = useState("/Avatar.jpg");
 
+  // Notifications States
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+
+  const fetchNotifications = () => {
+    try {
+      const userEmail = localStorage.getItem("vedaai_user_email") || "";
+      const stored = localStorage.getItem(`vedaai_notifications_${userEmail}`);
+      if (stored) {
+        setNotifications(JSON.parse(stored));
+      } else {
+        const welcomeNote = [
+          {
+            id: "welcome",
+            title: "Welcome to Veda AI!",
+            description: "Start creating custom class assessments instantly.",
+            link: "/create-assignment",
+            timestamp: "Just now",
+            unread: true
+          }
+        ];
+        localStorage.setItem(`vedaai_notifications_${userEmail}`, JSON.stringify(welcomeNote));
+        setNotifications(welcomeNote);
+      }
+    } catch (err) {
+      console.error("Error reading notifications:", err);
+    }
+  };
+
   useEffect(() => {
     const fetchProfile = () => {
       try {
@@ -35,11 +64,46 @@ const NavBar = () => {
     };
 
     fetchProfile();
+    fetchNotifications();
     
-    // Check periodically for instant updates
+    // Periodically update profile reactive details
     const interval = setInterval(fetchProfile, 2000);
-    return () => clearInterval(interval);
+
+    const handleSync = () => {
+      fetchNotifications();
+    };
+
+    window.addEventListener("vedaai_notification_sync", handleSync);
+    window.addEventListener("storage", handleSync);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("vedaai_notification_sync", handleSync);
+      window.removeEventListener("storage", handleSync);
+    };
   }, []);
+
+  const unreadCount = notifications.filter((n) => n.unread).length;
+
+  const handleBellClick = () => {
+    setShowDropdown(!showDropdown);
+  };
+
+  const handleNotificationClick = (id: string, link: string) => {
+    const userEmail = localStorage.getItem("vedaai_user_email") || "";
+    const updated = notifications.map((n) => n.id === id ? { ...n, unread: false } : n);
+    localStorage.setItem(`vedaai_notifications_${userEmail}`, JSON.stringify(updated));
+    setNotifications(updated);
+    setShowDropdown(false);
+    router.push(link);
+  };
+
+  const handleClearAll = () => {
+    const userEmail = localStorage.getItem("vedaai_user_email") || "";
+    const updated = notifications.map((n) => ({ ...n, unread: false }));
+    localStorage.setItem(`vedaai_notifications_${userEmail}`, JSON.stringify(updated));
+    setNotifications(updated);
+  };
 
   // Dynamic breadcrumb text
   let breadcrumb = "Assignment";
@@ -95,10 +159,59 @@ const NavBar = () => {
       </div>
 
       <div className="flex items-center gap-3">
-        {/* Notification Bell with Badge */}
-        <div className="relative bg-[#f5f5f5] p-2 rounded-full flex justify-center items-center cursor-pointer hover:bg-zinc-200/50 transition-colors">
-          <Bell className="w-5 h-5 text-zinc-700" />
-          <span className="absolute top-0.5 right-0.5 w-2 h-2 rounded-full bg-[#FF5A1F] border border-white"></span>
+        {/* Notification Bell Wrapper with Dropdown */}
+        <div className="relative">
+          <div 
+            onClick={handleBellClick}
+            className="bg-[#f5f5f5] p-2 rounded-full flex justify-center items-center cursor-pointer hover:bg-zinc-200/50 transition-colors"
+          >
+            <Bell className="w-5 h-5 text-zinc-700" />
+            {unreadCount > 0 && (
+              <span className="absolute top-0.5 right-0.5 w-2.5 h-2.5 rounded-full bg-[#FF5A1F] border border-white flex items-center justify-center text-[7px] text-white font-bold animate-pulse">
+                {unreadCount}
+              </span>
+            )}
+          </div>
+
+          {/* Floating Notifications Dropdown Panel */}
+          {showDropdown && (
+            <div className="absolute right-0 top-11 w-80 bg-white rounded-3xl border border-zinc-200/80 shadow-2xl p-4 flex flex-col gap-3 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+              <div className="flex justify-between items-center border-b border-zinc-100 pb-2">
+                <h3 className="text-xs font-black text-zinc-950 uppercase tracking-tight">Notifications</h3>
+                {unreadCount > 0 && (
+                  <button 
+                    onClick={handleClearAll}
+                    className="text-[9px] text-zinc-400 hover:text-zinc-600 font-bold uppercase hover:underline cursor-pointer"
+                  >
+                    Mark all read
+                  </button>
+                )}
+              </div>
+
+              <div className="flex flex-col gap-2 max-h-60 overflow-y-auto scrollbar-none">
+                {notifications.length > 0 ? (
+                  notifications.map((note) => (
+                    <div
+                      key={note.id}
+                      onClick={() => handleNotificationClick(note.id, note.link)}
+                      className={`p-3 rounded-2xl border transition-all cursor-pointer flex flex-col gap-0.5 text-left ${note.unread ? "bg-orange-50/20 border-orange-100/50 hover:bg-orange-50/40" : "bg-white border-zinc-100 hover:bg-zinc-50"}`}
+                    >
+                      <div className="flex justify-between items-start gap-1">
+                        <h4 className="text-xs font-black text-zinc-900 truncate flex-1">{note.title}</h4>
+                        {note.unread && <span className="w-1.5 h-1.5 rounded-full bg-[#FF5A1F] shrink-0 mt-1"></span>}
+                      </div>
+                      <p className="text-[10px] text-zinc-500 font-semibold leading-normal">{note.description}</p>
+                      <span className="text-[8px] text-zinc-400 mt-1 font-bold">{note.timestamp}</span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-6 text-zinc-400 text-xs font-semibold">
+                    No notifications yet.
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
         
         {/* Profile Navigator */}

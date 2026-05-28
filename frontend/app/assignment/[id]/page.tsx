@@ -315,6 +315,28 @@ export default function AssignmentOutputPage({ params }: PageProps) {
     socket.on("generation:complete", async (data) => {
       if (data.assignmentId === id) {
         setStatus("completed");
+        
+        const userEmail = localStorage.getItem("vedaai_user_email") || "";
+        
+        // Save success notification to client localStorage
+        try {
+          const stored = localStorage.getItem(`vedaai_notifications_${userEmail}`);
+          const currentNotifications = stored ? JSON.parse(stored) : [];
+          const newNotification = {
+            id: Date.now().toString(),
+            title: "Question Paper Ready! ✨",
+            description: `VedaAI has successfully generated the question paper and answer key for "${assignment?.topic || "your assignment"}".`,
+            link: `/assignment/${id}`,
+            timestamp: "Just now",
+            unread: true
+          };
+          const updated = [newNotification, ...currentNotifications];
+          localStorage.setItem(`vedaai_notifications_${userEmail}`, JSON.stringify(updated));
+          window.dispatchEvent(new Event("vedaai_notification_sync"));
+        } catch (err) {
+          console.error("Failed to save complete notification:", err);
+        }
+
         try {
           const token = localStorage.getItem("vedaai_auth_token") || "";
           const resPaper = await fetch(

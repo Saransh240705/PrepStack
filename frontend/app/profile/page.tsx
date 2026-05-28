@@ -11,6 +11,7 @@ import {
   CheckCircle2,
   Loader2,
   ArrowLeft,
+  LogOut,
 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -18,6 +19,13 @@ import { BACKEND_URL } from "../config";
 
 export default function ProfilePage() {
   const router = useRouter();
+
+  const handleLogout = () => {
+    if (!confirm("Are you sure you want to log out of VedaAI?")) return;
+    localStorage.removeItem("vedaai_auth_token");
+    window.dispatchEvent(new Event("vedaai_auth_sync"));
+    router.replace("/login");
+  };
 
   // Profile Form States
   const [userName, setUserName] = useState("John Doe");
@@ -270,6 +278,17 @@ export default function ProfilePage() {
                 </button>
               ))}
             </div>
+          </div>
+
+          {/* Log Out Button for Mobile/Responsive ease */}
+          <div className="w-full mt-6 pt-6 border-t border-zinc-100 flex justify-center">
+            <button
+              onClick={handleLogout}
+              className="flex items-center justify-center gap-2 w-full max-w-[200px] border border-rose-200 hover:bg-rose-50 text-rose-600 hover:text-rose-700 text-xs font-bold px-4 py-2.5 rounded-full cursor-pointer transition-all active:scale-[0.98]"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              Log Out of VedaAI
+            </button>
           </div>
         </div>
 

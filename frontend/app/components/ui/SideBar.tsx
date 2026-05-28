@@ -120,21 +120,12 @@ const SideBar = () => {
         {/* Sidebar Navigation Menu Items */}
         <div className="flex justify-center mt-12">
           <ul className="flex flex-col gap-2 font-bricolage w-60">
-            <li>
-              <Link href={"/"}>
-                <div
-                  className={`flex items-center w-full p-2.5 pl-3.5 rounded-xl gap-3 transition-all ${pathname === "/" ? "bg-[#F0F0F0] text-black font-black" : "text-[#5E5E5ECC] hover:bg-[#F5F5F5] hover:text-zinc-800"}`}
-                >
-                  <LayoutGrid className="size-4.5" />
-                  <h3 className="text-sm font-bold">Home</h3>
-                </div>
-              </Link>
-            </li>
+            
 
             <li>
-              <Link href={""}>
+              <Link href={"/my-groups"}>
                 <div
-                  className={`flex items-center w-full p-2.5 pl-3.5 rounded-xl gap-3 transition-all text-[#5E5E5ECC] hover:bg-[#F5F5F5] hover:text-zinc-800`}
+                  className={`flex items-center w-full p-2.5 pl-3.5 rounded-xl gap-3 transition-all ${pathname === "/my-groups" ? "bg-[#F0F0F0] text-black font-black" : "text-[#5E5E5ECC] hover:bg-[#F5F5F5] hover:text-zinc-800"}`}
                 >
                   <Image
                     src="/MyGroups.png"
@@ -165,8 +156,8 @@ const SideBar = () => {
             </li>
 
             <li>
-              <Link href={""}>
-                <div className="flex text-[#5E5E5ECC] items-center w-full p-2.5 pl-3.5 hover:bg-[#F5F5F5] hover:text-zinc-800 rounded-xl gap-3 transition-all">
+              <Link href={"/toolkit"}>
+                <div className={`flex items-center w-full p-2.5 pl-3.5 rounded-xl gap-3 transition-all ${pathname === "/toolkit" ? "bg-[#F0F0F0] text-black font-black" : "text-[#5E5E5ECC] hover:bg-[#F5F5F5] hover:text-zinc-800"}`}>
                   <Book className="size-4.5" />
                   <h3 className="text-sm font-bold">AI Teacher’s Toolkit</h3>
                 </div>
@@ -174,8 +165,8 @@ const SideBar = () => {
             </li>
 
             <li>
-              <Link href={""}>
-                <div className="flex text-[#5E5E5ECC] items-center w-full p-2.5 pl-3.5 hover:bg-[#F5F5F5] hover:text-zinc-800 rounded-xl gap-3 transition-all">
+              <Link href={"/library"}>
+                <div className={`flex items-center w-full p-2.5 pl-3.5 rounded-xl gap-3 transition-all ${pathname === "/library" ? "bg-[#F0F0F0] text-black font-black" : "text-[#5E5E5ECC] hover:bg-[#F5F5F5] hover:text-zinc-800"}`}>
                   <ChartPie className="size-4.5" />
                   <h3 className="text-sm font-bold">My Library</h3>
                 </div>

@@ -171,6 +171,26 @@ const page = () => {
       }
 
       const data = await response.json();
+
+      // Save notification to client localStorage
+      try {
+        const stored = localStorage.getItem(`vedaai_notifications_${userEmail}`);
+        const currentNotifications = stored ? JSON.parse(stored) : [];
+        const newNotification = {
+          id: Date.now().toString(),
+          title: "New Assignment Drafted!",
+          description: `${subject} - ${topic} (${className})`,
+          link: `/assignment/${data.assignmentId}`,
+          timestamp: "Just now",
+          unread: true
+        };
+        const updated = [newNotification, ...currentNotifications];
+        localStorage.setItem(`vedaai_notifications_${userEmail}`, JSON.stringify(updated));
+        window.dispatchEvent(new Event("vedaai_notification_sync"));
+      } catch (err) {
+        console.error("Failed to save assignment notification:", err);
+      }
+
       router.push(`/assignment/${data.assignmentId}`);
     } catch (err: any) {
       console.error(err);
