@@ -104,92 +104,55 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen w-full grid grid-cols-1 lg:grid-cols-12 font-bricolage text-black bg-[#fafafa]">
+    <div className="min-h-screen w-full flex flex-col font-bricolage text-black bg-[#fafafa] overflow-x-hidden">
       
-      {/* 🎨 Left Column: Visual Showcase using Banner.png */}
-      <div className="hidden lg:flex lg:col-span-7 relative h-screen overflow-hidden p-8 items-end">
-        {/* Background Image */}
+      {/* 🔮 Top Section: Full-bleed Showcase featuring Banner.png */}
+      <div className="hidden sm:block relative w-full h-[200px] sm:h-[260px] md:h-[320px] bg-[#0a0a0c] overflow-hidden shrink-0">
         <Image 
           src="/Banner.png" 
           alt="VedaAI Banner" 
           fill
           priority
-          className="object-cover object-center"
+          className="object-cover object-center opacity-95 "
         />
-        
-        {/* Sleek Radial Overlay for Depth */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10 z-10"></div>
-
-        {/* Premium Glassmorphic Card Overlay */}
-        <div className="relative z-20 w-full max-w-[620px] bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-8 shadow-2xl mb-4 text-white">
-          <div className="flex items-center gap-2 bg-white/15 w-fit px-3 py-1 rounded-full text-xs font-bold tracking-wider uppercase border border-white/10 mb-4 animate-pulse">
-            <Sparkles className="w-3.5 h-3.5 text-amber-300 fill-amber-300" />
-            <span>AI-Driven Education Toolkit</span>
-          </div>
-
-          <h2 className="text-3xl font-black tracking-tight leading-tight uppercase">
-            Formulate Professional Question Papers in 30 Seconds
-          </h2>
-          
-          <p className="text-white/80 text-sm mt-3 leading-relaxed font-semibold">
-            VedaAI parses curriculum files, documents, and reference sheets to draft structured, multi-section A4 question sheets with solutions instantly.
-          </p>
-
-          {/* Micro-Features grid inside glass banner */}
-          <div className="grid grid-cols-3 gap-4 border-t border-white/10 pt-6 mt-6 text-xs font-bold text-white/90">
-            <div className="flex flex-col gap-1">
-              <span className="text-emerald-400 text-sm font-black">100%</span>
-              <span>Curriculum Aligned</span>
-            </div>
-            <div className="flex flex-col gap-1">
-              <span className="text-amber-400 text-sm font-black">Multi-Format</span>
-              <span>Docx, PDFs & Images</span>
-            </div>
-            <div className="flex flex-col gap-1">
-              <span className="text-orange-400 text-sm font-black">Dynamic</span>
-              <span>A4 PDF Printing</span>
-            </div>
-          </div>
-        </div>
       </div>
 
-      {/* 💼 Right Column: Minimalist Premium Form Portal */}
-      <div className="lg:col-span-5 flex flex-col justify-center items-center p-6 md:p-12 relative overflow-hidden h-screen bg-white">
+      {/* 💼 Bottom Section: Curved Portal Form Panel (Original Light Mode Colors) */}
+      <div className="relative flex-1 w-full bg-[#fafafa] sm:rounded-t-[3.5rem] rounded-none border-t border-zinc-200/50 sm:shadow-[0_-12px_40px_rgba(0,0,0,0.03)] shadow-none px-6 py-12 md:py-14 flex flex-col items-center z-20">
         
-        {/* Decorative Background Radial Blur */}
-        <div className="absolute top-0 right-0 w-[400px] h-[400px] rounded-full bg-zinc-50/50 blur-3xl -z-10"></div>
-        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] rounded-full bg-orange-50/20 blur-3xl -z-10"></div>
-
-        <div className="w-full max-w-[420px] flex flex-col gap-8">
+        <div className="w-full max-w-[420px] flex flex-col gap-6">
           
-          {/* Logo & Branded Headers */}
-          <div className="text-center md:text-left flex flex-col gap-2">
-            <div className="flex items-center justify-center md:justify-start gap-2">
+          {/* Header Pill & Title */}
+          <div className="text-center flex flex-col gap-2 items-center">
+            {/* Mobile-only Logo */}
+            <div className="flex sm:hidden items-center gap-2 mb-18">
               <Image 
                 src="/Logo.png" 
                 alt="Logo" 
-                width={36} 
-                height={36} 
-                style={{ width: "36px", height: "auto" }} 
+                width={32} 
+                height={32} 
+                style={{ width: "32px", height: "auto" }} 
               />
-              <span className="font-extrabold text-2xl tracking-tight">VedaAI</span>
+              <span className="font-extrabold text-2xl tracking-tight text-zinc-950">VedaAI</span>
             </div>
+
             
-            <h1 className="text-3xl font-black tracking-tight mt-2 text-zinc-950 uppercase">
+            
+            <h1 className="text-3xl font-black tracking-tight text-zinc-950 uppercase mt-1">
               {activeTab === "login" ? "Welcome Back" : "Start For Free"}
             </h1>
-            <p className="text-zinc-500 text-sm">
+            <p className="text-zinc-500 text-xs">
               {activeTab === "login" 
                 ? "Enter your credentials to manage your curriculum." 
                 : "Create a teacher profile and start drafting sheets."}
             </p>
           </div>
 
-          {/* Premium Tab Switcher */}
-          <div className="grid grid-cols-2 p-1.5 bg-zinc-100 rounded-full border border-zinc-200/50 shadow-inner">
+          {/* Premium Light Tab Switcher */}
+          <div className="grid grid-cols-2 p-1 bg-zinc-100 rounded-full border border-zinc-200/50 shadow-inner">
             <button
               onClick={() => { setActiveTab("login"); setError(null); }}
-              className={`py-2 px-4 rounded-full text-sm font-bold transition-all duration-300 cursor-pointer ${
+              className={`py-2 px-4 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer ${
                 activeTab === "login" 
                   ? "bg-black text-white shadow-md scale-102" 
                   : "text-zinc-500 hover:text-zinc-800"
@@ -199,7 +162,7 @@ export default function LoginPage() {
             </button>
             <button
               onClick={() => { setActiveTab("signup"); setError(null); }}
-              className={`py-2 px-4 rounded-full text-sm font-bold transition-all duration-300 cursor-pointer ${
+              className={`py-2 px-4 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer ${
                 activeTab === "signup" 
                   ? "bg-black text-white shadow-md scale-102" 
                   : "text-zinc-500 hover:text-zinc-800"
@@ -275,7 +238,7 @@ export default function LoginPage() {
                   className="w-full bg-zinc-50 border border-zinc-200/80 rounded-2xl pl-11 pr-11 py-3.5 text-sm outline-none font-semibold text-zinc-800 focus:bg-white focus:border-zinc-950 focus:shadow-[0_0_0_3px_rgba(0,0,0,0.02)] transition-all"
                 />
                 
-                {/* Micro-interaction toggle password */}
+                {/* Toggle Password */}
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
@@ -348,6 +311,12 @@ export default function LoginPage() {
                 </button>
               </span>
             )}
+          </div>
+
+          {/* Brand verification statement */}
+          <div className="flex items-center justify-center gap-1.5 opacity-40 text-[10px] font-bold tracking-widest text-zinc-400 mt-6 uppercase">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span>Safe • Secure • Educator-First</span>
           </div>
 
         </div>
