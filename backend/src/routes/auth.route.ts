@@ -5,7 +5,7 @@ import { User } from "../models/User.model";
 import { authenticateToken, AuthRequest } from "../config/auth.middleware";
 
 const router = Router();
-const JWT_SECRET = process.env.JWT_SECRET || "vedaai-super-secret-jwt-key-2026";
+const JWT_SECRET = process.env.JWT_SECRET as string;
 
 // Helper to generate JWT token
 const generateToken = (userId: string, email: string): string => {
