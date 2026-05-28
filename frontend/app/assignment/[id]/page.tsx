@@ -96,8 +96,12 @@ export default function AssignmentOutputPage({ params }: PageProps) {
     setProgressStep(0);
 
     try {
+      const token = localStorage.getItem("vedaai_auth_token") || "";
       const res = await fetch(`http://localhost:5001/api/assignments/${id}/regenerate`, {
-        method: "POST"
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
       });
       if (!res.ok) throw new Error("Regeneration failed");
     } catch (err) {
@@ -243,14 +247,23 @@ export default function AssignmentOutputPage({ params }: PageProps) {
           }
         }
         
-        const resAssignment = await fetch(`http://localhost:5001/api/assignments/${id}`);
+        const token = localStorage.getItem("vedaai_auth_token") || "";
+        const resAssignment = await fetch(`http://localhost:5001/api/assignments/${id}`, {
+          headers: {
+            "Authorization": `Bearer ${token}`
+          }
+        });
         if (!resAssignment.ok) throw new Error("Assignment not found");
         const assignmentData = await resAssignment.json();
         setAssignment(assignmentData);
         setStatus(assignmentData.status);
 
         if (assignmentData.status === "completed") {
-          const resPaper = await fetch(`http://localhost:5001/api/papers/${id}`);
+          const resPaper = await fetch(`http://localhost:5001/api/papers/${id}`, {
+            headers: {
+              "Authorization": `Bearer ${token}`
+            }
+          });
           if (resPaper.ok) {
             const paperData = await resPaper.json();
             setPaper(paperData);
@@ -281,7 +294,12 @@ export default function AssignmentOutputPage({ params }: PageProps) {
       if (data.assignmentId === id) {
         setStatus("completed");
         try {
-          const resPaper = await fetch(`http://localhost:5001/api/papers/${id}`);
+          const token = localStorage.getItem("vedaai_auth_token") || "";
+          const resPaper = await fetch(`http://localhost:5001/api/papers/${id}`, {
+            headers: {
+              "Authorization": `Bearer ${token}`
+            }
+          });
           if (resPaper.ok) {
             const paperData = await resPaper.json();
             setPaper(paperData);

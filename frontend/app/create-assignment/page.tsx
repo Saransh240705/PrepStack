@@ -95,8 +95,12 @@ const page = () => {
     formData.append("file", file);
 
     try {
+      const token = localStorage.getItem("vedaai_auth_token") || "";
       const response = await fetch("http://localhost:5001/api/upload", {
         method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`
+        },
         body: formData,
       });
       const data = await response.json();
@@ -133,10 +137,12 @@ const page = () => {
 
       const userEmail = typeof window !== "undefined" ? localStorage.getItem("vedaai_user_email") || "" : "";
 
+      const token = localStorage.getItem("vedaai_auth_token") || "";
       const response = await fetch("http://localhost:5001/api/assignments", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
         },
         body: JSON.stringify({
           subject,

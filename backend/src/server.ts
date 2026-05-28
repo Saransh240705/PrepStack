@@ -8,12 +8,14 @@ import assignmentRoutes from './routes/assigments.route';
 import papersRoute from './routes/papers.route';
 import "./workers/generationWorker";
 import uploadRoute from "./routes/upload.route";
+import authRoutes from "./routes/auth.route";
 
 const app = express();
-app.use(cors(process.env.PORT as any))
+app.use(cors());
 
 app.use(express.json());
 
+app.use("/api/auth", authRoutes);
 app.use("/api/assignments", assignmentRoutes);
 app.use("/api/papers", papersRoute);
 app.use("/api/upload", uploadRoute);

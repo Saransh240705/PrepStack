@@ -8,11 +8,13 @@ let publisher: Redis;
 let subscriber: Redis;
 
 // Initialize publisher so any process (server or worker) can publish events
-publisher = new Redis({
-  host: redisConnection.host,
-  port: redisConnection.port,
-  maxRetriesPerRequest: null,
-});
+publisher = typeof redisConnection === "string"
+  ? new Redis(redisConnection, { maxRetriesPerRequest: null })
+  : new Redis({
+      host: redisConnection.host,
+      port: redisConnection.port,
+      maxRetriesPerRequest: null,
+    });
 
 publisher.on("error", (err: any) => {
   console.error("Redis Publisher Error:", err);
@@ -34,11 +36,13 @@ export const setupSocket = (server: HttpServer) => {
   });
 
   // Initialize subscriber on the main server to receive events from Redis and emit to clients
-  subscriber = new Redis({
-    host: redisConnection.host,
-    port: redisConnection.port,
-    maxRetriesPerRequest: null,
-  });
+  subscriber = typeof redisConnection === "string"
+    ? new Redis(redisConnection, { maxRetriesPerRequest: null })
+    : new Redis({
+        host: redisConnection.host,
+        port: redisConnection.port,
+        maxRetriesPerRequest: null,
+      });
 
   subscriber.on("error", (err: any) => {
     console.error("Redis Subscriber Error:", err);

@@ -38,19 +38,55 @@ export default function ProfilePage() {
 
   // Fetch current values from localStorage on mount
   useEffect(() => {
-    try {
-      const userEmail = localStorage.getItem("vedaai_user_email") || "";
-      const stored = localStorage.getItem(`vedaai_profile_${userEmail}`);
-      if (stored) {
-        const profile = JSON.parse(stored);
-        if (profile.userName) setUserName(profile.userName);
-        if (profile.schoolName) setSchoolName(profile.schoolName);
-        if (profile.schoolAddress) setSchoolAddress(profile.schoolAddress);
-        if (profile.avatar) setAvatar(profile.avatar);
+    const fetchMe = async () => {
+      try {
+        const token = localStorage.getItem("vedaai_auth_token") || "";
+        const userEmail = localStorage.getItem("vedaai_user_email") || "";
+        
+        const res = await fetch("http://localhost:5001/api/auth/me", {
+          headers: {
+            "Authorization": `Bearer ${token}`
+          }
+        });
+        
+        if (res.ok) {
+          const data = await res.json();
+          if (data.user) {
+            if (data.user.fullName) setUserName(data.user.fullName);
+            if (data.user.schoolName) setSchoolName(data.user.schoolName);
+            if (data.user.schoolAddress) setSchoolAddress(data.user.schoolAddress);
+            if (data.user.avatar) setAvatar(data.user.avatar);
+            
+            const profile = {
+              userName: data.user.fullName,
+              schoolName: data.user.schoolName,
+              schoolAddress: data.user.schoolAddress,
+              avatar: data.user.avatar
+            };
+            localStorage.setItem(`vedaai_profile_${userEmail}`, JSON.stringify(profile));
+            return;
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load profile from backend, falling back:", err);
       }
-    } catch (err) {
-      console.error("Failed to load profile details on mount:", err);
-    }
+
+      try {
+        const userEmail = localStorage.getItem("vedaai_user_email") || "";
+        const stored = localStorage.getItem(`vedaai_profile_${userEmail}`);
+        if (stored) {
+          const profile = JSON.parse(stored);
+          if (profile.userName) setUserName(profile.userName);
+          if (profile.schoolName) setSchoolName(profile.schoolName);
+          if (profile.schoolAddress) setSchoolAddress(profile.schoolAddress);
+          if (profile.avatar) setAvatar(profile.avatar);
+        }
+      } catch (err) {
+        console.error("Failed to load profile details on mount:", err);
+      }
+    };
+
+    fetchMe();
   }, []);
 
   // Handle uploading custom Avatar to Cloudinary
@@ -62,8 +98,12 @@ export default function ProfilePage() {
     formData.append("file", file);
 
     try {
+      const token = localStorage.getItem("vedaai_auth_token") || "";
       const response = await fetch("http://localhost:5001/api/upload", {
         method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`
+        },
         body: formData,
       });
       if (!response.ok) throw new Error("Upload failed");
@@ -77,30 +117,53 @@ export default function ProfilePage() {
     }
   };
 
-  // Save profile to localStorage
-  const handleSave = () => {
+  const handleSave = async () => {
     setIsSaving(true);
-    setTimeout(() => {
-      try {
-        const userEmail = localStorage.getItem("vedaai_user_email") || "";
-        const profile = {
-          userName,
+    const token = localStorage.getItem("vedaai_auth_token") || "";
+    const userEmail = localStorage.getItem("vedaai_user_email") || "";
+    const profile = {
+      userName,
+      schoolName,
+      schoolAddress,
+      avatar
+    };
+
+    try {
+      const response = await fetch("http://localhost:5001/api/auth/profile", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          fullName: userName,
           schoolName,
           schoolAddress,
           avatar
-        };
-        localStorage.setItem(`vedaai_profile_${userEmail}`, JSON.stringify(profile));
-        
-        // Show success indicator
-        setShowSuccessNotification(true);
-        setTimeout(() => setShowSuccessNotification(false), 3000);
-      } catch (err) {
-        console.error("Failed to save profile:", err);
-        alert("Failed to save profile details.");
-      } finally {
-        setIsSaving(false);
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to save profile on server");
       }
-    }, 800); // Add a small professional state transition delay
+
+      localStorage.setItem(`vedaai_profile_${userEmail}`, JSON.stringify(profile));
+      
+      // Dispatch sync event to instantly update SideBar and NavBar
+      window.dispatchEvent(new Event("vedaai_auth_sync"));
+
+      setShowSuccessNotification(true);
+      setTimeout(() => setShowSuccessNotification(false), 3000);
+    } catch (err) {
+      console.error("Failed to save profile:", err);
+      // Fallback
+      localStorage.setItem(`vedaai_profile_${userEmail}`, JSON.stringify(profile));
+      window.dispatchEvent(new Event("vedaai_auth_sync"));
+      setShowSuccessNotification(true);
+      setTimeout(() => setShowSuccessNotification(false), 3000);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (

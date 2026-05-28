@@ -85,7 +85,9 @@ export default function OnboardingPage() {
   const handleCompleteOnboarding = async () => {
     setIsFinishing(true);
 
-    // Save profile configurations
+    const token = localStorage.getItem("vedaai_auth_token") || "";
+    const userEmail = localStorage.getItem("vedaai_user_email") || "";
+
     const updatedProfile = {
       userName,
       schoolName: schoolName || "Navyug Convent School",
@@ -96,8 +98,25 @@ export default function OnboardingPage() {
       subjectFocus
     };
 
-    setTimeout(() => {
-      const userEmail = localStorage.getItem("vedaai_user_email") || "";
+    try {
+      const response = await fetch("http://localhost:5001/api/auth/onboard", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          schoolName: schoolName || "Navyug Convent School",
+          schoolAddress: schoolAddress || "New Delhi",
+          role: roleTitle,
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to save onboarding details.");
+      }
+
+      // Synchronize local storage for instant sync backward compatibility
       localStorage.setItem(`vedaai_profile_${userEmail}`, JSON.stringify(updatedProfile));
       localStorage.setItem(`vedaai_onboarded_${userEmail}`, "true");
       
@@ -105,8 +124,16 @@ export default function OnboardingPage() {
       window.dispatchEvent(new Event("vedaai_auth_sync"));
       
       router.push("/assignment");
+    } catch (err) {
+      console.error("Onboarding error:", err);
+      // Fallback gracefully to localStorage
+      localStorage.setItem(`vedaai_profile_${userEmail}`, JSON.stringify(updatedProfile));
+      localStorage.setItem(`vedaai_onboarded_${userEmail}`, "true");
+      window.dispatchEvent(new Event("vedaai_auth_sync"));
+      router.push("/assignment");
+    } finally {
       setIsFinishing(false);
-    }, 1800);
+    }
   };
 
   return (

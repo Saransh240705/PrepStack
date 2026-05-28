@@ -49,48 +49,57 @@ export default function LoginPage() {
       return;
     }
 
-    setIsLoading(true);
+    try {
+      const endpoint = activeTab === "login" ? "login" : "signup";
+      const payload = activeTab === "login" 
+        ? { email, password } 
+        : { email, password, fullName };
 
-    // Simulate premium API call
-    setTimeout(() => {
-      try {
-        if (activeTab === "login") {
-          // Log in flow
-          localStorage.setItem("vedaai_auth_token", "mock-jwt-token-12345");
-          localStorage.setItem("vedaai_user_email", email);
-          
-          // Trigger a custom event to notify other elements instantly
-          window.dispatchEvent(new Event("vedaai_auth_sync"));
+      const response = await fetch(`http://localhost:5001/api/auth/${endpoint}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      });
 
-          const onboarded = localStorage.getItem(`vedaai_onboarded_${email}`) === "true";
-          if (onboarded) {
-            router.push("/assignment");
-          } else {
-            router.push("/onboarding");
-          }
-        } else {
-          // Sign up flow
-          localStorage.setItem("vedaai_auth_token", "mock-jwt-token-12345");
-          localStorage.setItem("vedaai_user_email", email);
-          
-          // Store basic profile setup initialized with signup name
-          const initialProfile = {
-            userName: fullName,
-            schoolName: "",
-            schoolAddress: "",
-            avatar: "/Avatar.jpg"
-          };
-          localStorage.setItem(`vedaai_profile_${email}`, JSON.stringify(initialProfile));
-          
-          window.dispatchEvent(new Event("vedaai_auth_sync"));
-          router.push("/onboarding");
-        }
-      } catch (err) {
-        setError("An error occurred during authentication. Please try again.");
-      } finally {
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || "Authentication failed. Please check your credentials.");
         setIsLoading(false);
+        return;
       }
-    }, 1500);
+
+      // Successful Auth
+      localStorage.setItem("vedaai_auth_token", data.token);
+      localStorage.setItem("vedaai_user_email", data.user.email);
+      localStorage.setItem("vedaai_user_name", data.user.fullName);
+      
+      // Save profile info to local storage for instant sync backward compatibility
+      const profileInfo = {
+        userName: data.user.fullName,
+        schoolName: data.user.schoolName,
+        schoolAddress: data.user.schoolAddress,
+        avatar: data.user.avatar || "/Avatar.jpg",
+        roleTitle: data.user.role || ""
+      };
+      localStorage.setItem(`vedaai_profile_${data.user.email}`, JSON.stringify(profileInfo));
+      localStorage.setItem(`vedaai_onboarded_${data.user.email}`, data.user.onboarded ? "true" : "false");
+
+      window.dispatchEvent(new Event("vedaai_auth_sync"));
+
+      if (data.user.onboarded) {
+        router.push("/assignment");
+      } else {
+        router.push("/onboarding");
+      }
+    } catch (err) {
+      console.error("Auth submit error:", err);
+      setError("Unable to connect to VedaAI server. Please ensure the backend is running.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

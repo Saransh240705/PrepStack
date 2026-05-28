@@ -4,7 +4,27 @@ import { Assignment } from "../models/Assignment.model";
 import { GeneratedPaper } from "../models/GeneratedPaper.model";
 import { addGenerationJob } from "../queues/generationQueue";
 
+import jwt from "jsonwebtoken";
+
 const router = Router();
+const JWT_SECRET = process.env.JWT_SECRET || "vedaai-super-secret-jwt-key-2026";
+
+const getUserEmail = (req: Request): string | undefined => {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
+  if (token) {
+    try {
+      const decoded: any = jwt.verify(token, JWT_SECRET);
+      if (decoded && decoded.email) {
+        return decoded.email;
+      }
+    } catch (e) {
+      // Ignore token verification errors and fall back
+    }
+  }
+  const legacyEmail = req.headers["x-user-email"];
+  return typeof legacyEmail === "string" ? legacyEmail : undefined;
+};
 
 const createAssignmentSchma = z.object({
   subject: z.string().min(1),
@@ -23,9 +43,11 @@ const createAssignmentSchma = z.object({
 router.post("/", async (req: Request, res: Response) => {
   try {
     const body = createAssignmentSchma.parse(req.body);
+    const email = getUserEmail(req) || body.createdBy;
 
     const assignment = await Assignment.create({
       ...body,
+      createdBy: email,
       dueDate: new Date(body.dueDate),
     });
 
@@ -46,7 +68,7 @@ router.post("/", async (req: Request, res: Response) => {
 
 router.get("/", async (req: Request, res: Response) => {
   try {
-    const userEmail = req.headers["x-user-email"];
+    const userEmail = getUserEmail(req);
     const query = userEmail ? { createdBy: userEmail } : {};
     const assignments = await Assignment.find(query).sort({ createdAt: -1 });
     res.json(assignments);

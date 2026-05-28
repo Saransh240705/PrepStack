@@ -46,9 +46,11 @@ export default function AssignmentsPage() {
   // Fetch all assignments
   const fetchAssignments = async () => {
     try {
+      const token = localStorage.getItem("vedaai_auth_token") || "";
       const userEmail = localStorage.getItem("vedaai_user_email") || "";
       const res = await fetch("http://localhost:5001/api/assignments", {
         headers: {
+          "Authorization": `Bearer ${token}`,
           "x-user-email": userEmail
         }
       });
@@ -88,8 +90,12 @@ export default function AssignmentsPage() {
     if (!confirm("Are you sure you want to delete this assignment?")) return;
 
     try {
+      const token = localStorage.getItem("vedaai_auth_token") || "";
       const res = await fetch(`http://localhost:5001/api/assignments/${id}`, {
         method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
       });
       if (res.ok) {
         setAssignments((prev) => prev.filter((item) => item._id !== id));
