@@ -23,8 +23,9 @@ publisher.on("error", (err: any) => {
 export const setupSocket = (server: HttpServer) => {
   io = new Server(server, {
     cors: {
-      origin: ["http://localhost:3000", "http://localhost:5173"],
+      origin: ["http://localhost:3000", "http://localhost:5173", "https://vedaai-mkhh.onrender.com"],
       methods: ["GET", "POST"],
+      credentials: true
     },
   });
 

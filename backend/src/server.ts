@@ -11,7 +11,10 @@ import uploadRoute from "./routes/upload.route";
 import authRoutes from "./routes/auth.route";
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: ["http://localhost:3000", "http://localhost:5173", "https://vedaai-mkhh.onrender.com"],
+  credentials: true
+}));
 
 app.use(express.json());
 
