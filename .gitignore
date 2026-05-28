@@ -1,0 +1,51 @@
+# VedaAI Monorepo GitIgnore Configuration
+
+# Dependencies (Globally ignore node_modules across monorepo)
+**/node_modules/
+node_modules/
+.pnp
+.pnp.*
+
+# Local Environment Variables & Security Credentials (CRITICAL)
+**/.env
+**/.env.local
+**/.env.*.local
+.env
+.env.local
+.env.production
+.env.development
+*.pem
+*.key
+
+# Next.js Build Outputs & Production Bundles
+**/frontend/.next/
+**/frontend/out/
+/frontend/.next/
+/frontend/out/
+/build
+/dist
+
+# Diagnostic Scripts & Upload Test Dumps
+**/backend/test-*.pdf
+**/backend/test-*.png
+**/backend/test-*.txt
+backend/test-file.pdf
+backend/test-image.png
+backend/test-upload.txt
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# System & IDE Metafiles
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+.vscode/
+.idea/
+.gemini/
+.next/
