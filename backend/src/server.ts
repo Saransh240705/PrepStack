@@ -26,7 +26,16 @@ const server = http.createServer(app);
 setupSocket(server);
 
 
-const PORT = process.env.PORT || 5001;
+const rawPort = process.env.PORT;
+let PORT = 5001;
+if (rawPort) {
+  const parsed = Number(rawPort);
+  if (!isNaN(parsed)) {
+    PORT = parsed;
+  } else {
+    console.warn(`[VedaAI] WARNING: PORT environment variable ("${rawPort}") is not a valid number. Falling back to default port 5001.`);
+  }
+}
 
 connectDB().then(() => {
     server.listen(PORT, () => {
