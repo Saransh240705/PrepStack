@@ -22,6 +22,9 @@ const bricolage = Bricolage_Grotesque({
 export const metadata: Metadata = {
   title: "Veda AI",
   description: "Veda AI",
+  icons: {
+    icon: "/icon.png",
+  },
 };
 
 export default function RootLayout({
