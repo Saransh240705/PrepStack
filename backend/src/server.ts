@@ -10,7 +10,7 @@ import "./workers/generationWorker";
 import uploadRoute from "./routes/upload.route";
 
 const app = express();
-app.use(cors({ origin: "http://localhost:3000"}))
+app.use(cors(process.env.PORT as any))
 
 app.use(express.json());
 
