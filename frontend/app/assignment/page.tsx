@@ -14,11 +14,13 @@ import {
   Sparkles,
   CheckCircle2,
   XCircle,
-  AlertCircle
+  AlertCircle,
+  ArrowLeft
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { BACKEND_URL } from "../config";
 
 interface Assignment {
   _id: string;
@@ -48,7 +50,7 @@ export default function AssignmentsPage() {
     try {
       const token = localStorage.getItem("vedaai_auth_token") || "";
       const userEmail = localStorage.getItem("vedaai_user_email") || "";
-      const res = await fetch("http://localhost:5001/api/assignments", {
+      const res = await fetch(`${BACKEND_URL}/api/assignments`, {
         headers: {
           "Authorization": `Bearer ${token}`,
           "x-user-email": userEmail
@@ -91,7 +93,7 @@ export default function AssignmentsPage() {
 
     try {
       const token = localStorage.getItem("vedaai_auth_token") || "";
-      const res = await fetch(`http://localhost:5001/api/assignments/${id}`, {
+      const res = await fetch(`${BACKEND_URL}/api/assignments/${id}`, {
         method: "DELETE",
         headers: {
           "Authorization": `Bearer ${token}`
@@ -125,7 +127,7 @@ export default function AssignmentsPage() {
 
   if (loading) {
     return (
-      <div className="ml-84 w-[70rem] py-24 flex flex-col items-center justify-center min-h-[50vh] font-bricolage text-black">
+      <div className="lg:ml-84 lg:w-[70rem] w-full px-4 lg:px-0 py-24 flex flex-col items-center justify-center min-h-[50vh] font-bricolage text-black">
         <Loader2 className="w-10 h-10 animate-spin text-orange-500 mb-4" />
         <p className="font-semibold text-zinc-500 animate-pulse">Loading assignments...</p>
       </div>
@@ -135,18 +137,18 @@ export default function AssignmentsPage() {
   // ⚪ Case A: No assignments in database at all
   if (assignments.length === 0) {
     return (
-      <div className="ml-84 w-[70rem] flex flex-col items-center justify-center min-h-[70vh] py-12">
+      <div className="lg:ml-84 lg:w-[70rem] w-full px-4 lg:px-0 flex flex-col items-center justify-center min-h-[75vh] py-12 pb-24 relative">
         <div className="flex flex-col items-center text-center max-w-[500px]">
           {/* Main Illustration */}
-          <div className="relative mb-6 flex items-center justify-center w-[320px] h-[320px]">
+          <div className="relative mb-6 flex items-center justify-center w-[300px] h-[300px]">
             {/* Custom Soft Backdrop Circle */}
-            <div className="absolute rounded-full bg-[#f2f2f2] w-[250px] h-[250px] -z-10 shadow-2xl"></div>
+            <div className="absolute rounded-full bg-[#f2f2f2] w-[240px] h-[240px] -z-10 shadow-sm"></div>
             
             <Image 
               src="/NoAssignments.png" 
               alt="No Assignments" 
-              width={320} 
-              height={320} 
+              width={260} 
+              height={260} 
               priority
               className="object-contain relative z-10"
               style={{ height: "auto" }}
@@ -159,7 +161,7 @@ export default function AssignmentsPage() {
           </h2>
 
           {/* Description Paragraph */}
-          <p className="font-bricolage text-[#5E5E5ECC] text-sm md:text-base leading-relaxed mb-8 px-4">
+          <p className="font-bricolage text-[#5E5E5ECC] text-sm leading-relaxed mb-8 px-6">
             Create your first assignment to start collecting and grading student submissions. 
             You can set up rubrics, define marking criteria, and let AI assist with grading.
           </p>
@@ -171,15 +173,27 @@ export default function AssignmentsPage() {
             </button>
           </Link>
         </div>
+
       </div>
     );
   }
 
   return (
-    <div className="ml-84 w-[70rem] py-6 font-bricolage text-black min-h-[80vh] flex flex-col gap-6">
+    <div className="lg:ml-84 lg:w-[70rem] w-full px-4 lg:px-0 py-4 lg:py-6 font-bricolage text-black min-h-[80vh] flex flex-col gap-5 lg:gap-6 pb-24 relative">
       
-      {/* 🟢 Top Title Section */}
-      <div className="flex flex-col gap-1 bg-[#FFFFFF] rounded-2xl p-6 border border-zinc-100/50 shadow-sm relative overflow-hidden">
+      {/* 📱 Mobile Page Title & Back Arrow (Mockup 1) */}
+      <div className="flex lg:hidden items-center gap-4 mt-2 px-1">
+        <button
+          onClick={() => router.back()}
+          className="bg-[#EAEAEA] hover:bg-zinc-200 text-zinc-800 p-2.5 rounded-full cursor-pointer transition-colors shadow-sm flex items-center justify-center h-10 w-10 active:scale-95"
+        >
+          <ArrowLeft className="w-5 h-5 stroke-[2.5]" />
+        </button>
+        <h2 className="text-xl font-bold tracking-tight text-zinc-800">Assignments</h2>
+      </div>
+
+      {/* 🟢 Desktop Top Title Banner Card (Hidden on Mobile) */}
+      <div className="hidden lg:flex flex-col gap-1 bg-[#FFFFFF] rounded-2xl p-6 border border-zinc-100/50 shadow-sm relative overflow-hidden">
         <div className="absolute top-0 left-0 w-2 h-full bg-[#3CC878]"></div>
         <div className="flex items-center gap-2.5">
           <div className="w-3.5 h-3.5 rounded-full bg-[#3CC878] animate-pulse"></div>
@@ -188,36 +202,32 @@ export default function AssignmentsPage() {
         <p className="text-zinc-500 text-sm pl-6 mt-1">Manage and create assignments for your classes.</p>
       </div>
 
-      {/* 🔍 Search & Filter Bar */}
-      <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-zinc-100/50 shadow-sm">
-        
-        {/* Subject Filter selector */}
-        <div className="flex items-center gap-2 w-full md:w-auto">
-          <div className="flex items-center gap-2 bg-zinc-50 border border-zinc-200/80 px-4 py-2.5 rounded-full text-zinc-600 text-sm font-semibold hover:bg-zinc-100/50 transition-all">
-            <Filter className="w-4 h-4 text-zinc-500" />
-            <span>Filter By:</span>
-            <select
-              value={subjectFilter}
-              onChange={(e) => setSubjectFilter(e.target.value)}
-              className="bg-transparent border-none outline-none font-bold text-zinc-800 cursor-pointer ml-1 pr-2"
-            >
-              <option value="all">All Subjects</option>
-              {uniqueSubjects.map((sub) => (
-                <option key={sub} value={sub}>{sub}</option>
-              ))}
-            </select>
-          </div>
+      {/* 🔍 Search & Filter Bar (Mockup 1) */}
+      <div className="flex items-center justify-between gap-3 bg-white p-3 lg:p-4 rounded-2xl border border-zinc-200/50 shadow-sm w-full">
+        {/* Filter Trigger button */}
+        <div className="flex items-center gap-2 bg-white border border-zinc-200 px-4 py-2.5 rounded-full text-zinc-500 text-xs lg:text-sm font-bold hover:bg-zinc-50 cursor-pointer">
+          <Filter className="w-4 h-4 text-zinc-400" />
+          <select
+            value={subjectFilter}
+            onChange={(e) => setSubjectFilter(e.target.value)}
+            className="bg-transparent border-none outline-none font-bold text-zinc-800 cursor-pointer text-xs lg:text-sm pr-1"
+          >
+            <option value="all">Filter</option>
+            {uniqueSubjects.map((sub) => (
+              <option key={sub} value={sub}>{sub}</option>
+            ))}
+          </select>
         </div>
 
-        {/* Search Assignment Input */}
-        <div className="relative w-full md:w-[350px]">
+        {/* Search Input */}
+        <div className="relative flex-1 max-w-[280px] lg:max-w-[350px]">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
           <input
             type="text"
-            placeholder="Search Assignment..."
+            placeholder="Search Name"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-zinc-50 border border-zinc-200/80 rounded-full pl-11 pr-5 py-2.5 text-sm outline-none font-semibold text-zinc-800 placeholder-zinc-400 focus:bg-white focus:border-zinc-300 focus:shadow-[0_0_0_3px_rgba(0,0,0,0.02)] transition-all"
+            className="w-full bg-white border border-zinc-200 rounded-full pl-11 pr-5 py-2.5 text-xs lg:text-sm outline-none font-bold text-zinc-800 placeholder-zinc-400 focus:border-zinc-300 transition-all shadow-sm"
           />
         </div>
       </div>
@@ -235,7 +245,7 @@ export default function AssignmentsPage() {
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-24">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
           {filteredAssignments.map((a) => {
             const isDropdownOpen = openDropdownId === a._id;
             
@@ -255,44 +265,44 @@ export default function AssignmentsPage() {
               <div
                 key={a._id}
                 onClick={() => router.push(`/assignment/${a._id}`)}
-                className="group relative bg-[#FFFFFF] rounded-3xl p-6 border border-zinc-200/60 shadow-[0_4px_20px_rgba(0,0,0,0.02)] hover:shadow-[0_12px_35px_rgba(0,0,0,0.06)] hover:border-zinc-300 transition-all duration-300 flex flex-col justify-between min-h-[180px] cursor-pointer"
+                className="group relative bg-[#FFFFFF] rounded-3xl p-5 lg:p-6 border border-zinc-200 shadow-[0_4px_20px_rgba(0,0,0,0.01)] hover:shadow-[0_12px_35px_rgba(0,0,0,0.04)] hover:border-zinc-300 transition-all duration-300 flex flex-col justify-between min-h-[140px] lg:min-h-[180px] cursor-pointer"
               >
                 
                 {/* Top Row: Title, Muted subject pill, 3-dots */}
                 <div className="flex justify-between items-start gap-4">
-                  <div className="flex flex-col gap-1.5">
+                  <div className="flex flex-col gap-1">
                     <div className="flex items-center gap-2">
-                      <span className="bg-zinc-100 text-zinc-600 text-[11px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full">
+                      <span className="bg-zinc-100 text-zinc-600 text-[9px] lg:text-[11px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 lg:py-1 rounded-full">
                         {a.subject}
                       </span>
                       
-                      {/* Interactive Status Badges */}
+                      {/* Status Badges */}
                       {a.status === "processing" && (
-                        <span className="bg-amber-50 text-amber-600 border border-amber-200/50 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 animate-pulse">
+                        <span className="bg-amber-50 text-amber-600 border border-amber-200/50 text-[8px] lg:text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 animate-pulse">
                           <Loader2 className="w-3 h-3 animate-spin" />
                           Generating
                         </span>
                       )}
                       {a.status === "failed" && (
-                        <span className="bg-rose-50 text-rose-600 border border-rose-200/50 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                        <span className="bg-rose-50 text-rose-600 border border-rose-200/50 text-[8px] lg:text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
                           <XCircle className="w-3 h-3" />
                           Failed
                         </span>
                       )}
                       {a.status === "completed" && (
-                        <span className="bg-emerald-50 text-emerald-600 border border-emerald-200/50 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                        <span className="bg-emerald-50 text-emerald-600 border border-emerald-200/50 text-[8px] lg:text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
                           <CheckCircle2 className="w-3 h-3" />
                           Ready
                         </span>
                       )}
                     </div>
 
-                    <h3 className="text-xl font-bold tracking-tight text-zinc-900 group-hover:text-black mt-1">
-                      {a.topic}
+                    <h3 className="text-base lg:text-xl font-bold tracking-tight text-zinc-950 group-hover:text-black mt-2 leading-tight">
+                      Quiz on {a.topic}
                     </h3>
                   </div>
 
-                  {/* 3-dots drop toggle */}
+                  {/* 3-dots Dropdown */}
                   <div className="relative" ref={isDropdownOpen ? dropdownRef : null}>
                     <button
                       onClick={(e) => {
@@ -300,12 +310,11 @@ export default function AssignmentsPage() {
                         e.preventDefault();
                         setOpenDropdownId(isDropdownOpen ? null : a._id);
                       }}
-                      className="p-2 hover:bg-zinc-100 rounded-full transition-colors cursor-pointer text-zinc-500 hover:text-zinc-800"
+                      className="p-1.5 hover:bg-zinc-50 rounded-full transition-colors cursor-pointer text-zinc-500 hover:text-zinc-800 active:scale-95"
                     >
                       <MoreVertical className="w-5 h-5" />
                     </button>
 
-                    {/* Premium Dropdown options menu */}
                     {isDropdownOpen && (
                       <div className="absolute right-0 mt-1 w-44 bg-white rounded-2xl shadow-xl border border-zinc-100 py-2.5 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
                         <Link href={`/assignment/${a._id}`}>
@@ -328,7 +337,8 @@ export default function AssignmentsPage() {
                 </div>
 
                 {/* Footer details: Assigned / Due info */}
-                <div className="flex flex-wrap items-center justify-between gap-3 border-t border-zinc-100 pt-4 mt-6 text-xs text-zinc-500 font-semibold">
+                {/* Desktop view */}
+                <div className="hidden lg:flex flex-wrap items-center justify-between gap-3 border-t border-zinc-100 pt-4 mt-6 text-xs text-zinc-500 font-semibold">
                   <div className="flex items-center gap-1.5">
                     <span className="text-zinc-400">Assigned on:</span>
                     <span className="text-zinc-800 font-bold">{assignedDate}</span>
@@ -341,18 +351,23 @@ export default function AssignmentsPage() {
                   </div>
                 </div>
 
+                {/* Mobile view (Mockup 1) */}
+                <div className="flex lg:hidden items-center text-[11px] text-zinc-500 font-bold mt-4 tracking-tight border-t border-zinc-100/50 pt-3">
+                  <span>Assigned on : <span className="text-zinc-400 font-bold">{assignedDate}</span></span>
+                  <span className="ml-5">Due : <span className="text-zinc-400 font-bold">{dueDate}</span></span>
+                </div>
+
               </div>
             );
           })}
         </div>
       )}
 
-      {/* Floating Create Assignment Button at screen bottom */}
-      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-40 print:hidden">
+      {/* Floating Create Assignment Button (Mobile only, hidden on desktop since sidebar CTA is present) */}
+      <div className="fixed right-6 bottom-24 z-40 lg:hidden print:hidden">
         <Link href="/create-assignment">
-          <button className="flex items-center gap-2 bg-[#121212] hover:bg-black hover:scale-105 active:scale-[0.98] text-white font-bricolage font-bold px-8 py-4 rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.15)] transition-all duration-300 cursor-pointer">
-            <Plus className="w-5 h-5 stroke-[2.5]" />
-            <span>Create Assignment</span>
+          <button className="flex items-center justify-center bg-[#121212] hover:bg-black hover:scale-105 active:scale-[0.98] text-white font-bricolage font-bold p-4 rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.15)] transition-all duration-300 cursor-pointer h-14 w-14">
+            <Plus className="w-6 h-6 stroke-[2.5]" />
           </button>
         </Link>
       </div>

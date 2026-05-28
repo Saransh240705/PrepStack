@@ -8,13 +8,14 @@ let publisher: Redis;
 let subscriber: Redis;
 
 // Initialize publisher so any process (server or worker) can publish events
-publisher = typeof redisConnection === "string"
-  ? new Redis(redisConnection, { maxRetriesPerRequest: null })
-  : new Redis({
-      host: redisConnection.host,
-      port: redisConnection.port,
-      maxRetriesPerRequest: null,
-    });
+publisher =
+  typeof redisConnection === "string"
+    ? new Redis(redisConnection, { maxRetriesPerRequest: null })
+    : new Redis({
+        host: redisConnection.host,
+        port: redisConnection.port,
+        maxRetriesPerRequest: null,
+      });
 
 publisher.on("error", (err: any) => {
   console.error("Redis Publisher Error:", err);
@@ -23,9 +24,13 @@ publisher.on("error", (err: any) => {
 export const setupSocket = (server: HttpServer) => {
   io = new Server(server, {
     cors: {
-      origin: ["http://localhost:3000", "http://localhost:5173", "https://vedaai-mkhh.onrender.com"],
+      origin: [
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "https://vedaai-mkhh.onrender.com",
+      ],
       methods: ["GET", "POST"],
-      credentials: true
+      credentials: true,
     },
   });
 
@@ -37,13 +42,14 @@ export const setupSocket = (server: HttpServer) => {
   });
 
   // Initialize subscriber on the main server to receive events from Redis and emit to clients
-  subscriber = typeof redisConnection === "string"
-    ? new Redis(redisConnection, { maxRetriesPerRequest: null })
-    : new Redis({
-        host: redisConnection.host,
-        port: redisConnection.port,
-        maxRetriesPerRequest: null,
-      });
+  subscriber =
+    typeof redisConnection === "string"
+      ? new Redis(redisConnection, { maxRetriesPerRequest: null })
+      : new Redis({
+          host: redisConnection.host,
+          port: redisConnection.port,
+          maxRetriesPerRequest: null,
+        });
 
   subscriber.on("error", (err: any) => {
     console.error("Redis Subscriber Error:", err);
@@ -78,7 +84,8 @@ export const getIO = () => {
   // but publishes events to Redis so the server process can broadcast them.
   return {
     emit: (event: string, data: any) => {
-      publisher.publish("socket-events", JSON.stringify({ event, data }))
+      publisher
+        .publish("socket-events", JSON.stringify({ event, data }))
         .catch((err: any) => {
           console.error("Failed to publish socket event to Redis:", err);
           // Fallback to local emission if io is available
@@ -87,6 +94,6 @@ export const getIO = () => {
           }
         });
       return true;
-    }
+    },
   } as unknown as Server;
 };

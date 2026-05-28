@@ -1,18 +1,20 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { 
-  User, 
-  School, 
-  MapPin, 
-  UploadCloud, 
-  Save, 
-  Sparkles, 
-  CheckCircle2, 
-  Loader2 
+import {
+  User,
+  School,
+  MapPin,
+  UploadCloud,
+  Save,
+  Sparkles,
+  CheckCircle2,
+  Loader2,
+  ArrowLeft,
 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { BACKEND_URL } from "../config";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -42,33 +44,40 @@ export default function ProfilePage() {
       try {
         const token = localStorage.getItem("vedaai_auth_token") || "";
         const userEmail = localStorage.getItem("vedaai_user_email") || "";
-        
-        const res = await fetch("http://localhost:5001/api/auth/me", {
+
+        const res = await fetch(`${BACKEND_URL}/api/auth/me`, {
           headers: {
-            "Authorization": `Bearer ${token}`
-          }
+            Authorization: `Bearer ${token}`,
+          },
         });
-        
+
         if (res.ok) {
           const data = await res.json();
           if (data.user) {
             if (data.user.fullName) setUserName(data.user.fullName);
             if (data.user.schoolName) setSchoolName(data.user.schoolName);
-            if (data.user.schoolAddress) setSchoolAddress(data.user.schoolAddress);
+            if (data.user.schoolAddress)
+              setSchoolAddress(data.user.schoolAddress);
             if (data.user.avatar) setAvatar(data.user.avatar);
-            
+
             const profile = {
               userName: data.user.fullName,
               schoolName: data.user.schoolName,
               schoolAddress: data.user.schoolAddress,
-              avatar: data.user.avatar
+              avatar: data.user.avatar,
             };
-            localStorage.setItem(`vedaai_profile_${userEmail}`, JSON.stringify(profile));
+            localStorage.setItem(
+              `vedaai_profile_${userEmail}`,
+              JSON.stringify(profile),
+            );
             return;
           }
         }
       } catch (err) {
-        console.error("Failed to load profile from backend, falling back:", err);
+        console.error(
+          "Failed to load profile from backend, falling back:",
+          err,
+        );
       }
 
       try {
@@ -99,10 +108,10 @@ export default function ProfilePage() {
 
     try {
       const token = localStorage.getItem("vedaai_auth_token") || "";
-      const response = await fetch("http://localhost:5001/api/upload", {
+      const response = await fetch(`${BACKEND_URL}/api/upload`, {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
         body: formData,
       });
@@ -125,30 +134,33 @@ export default function ProfilePage() {
       userName,
       schoolName,
       schoolAddress,
-      avatar
+      avatar,
     };
 
     try {
-      const response = await fetch("http://localhost:5001/api/auth/profile", {
+      const response = await fetch(`${BACKEND_URL}/api/auth/profile`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           fullName: userName,
           schoolName,
           schoolAddress,
-          avatar
-        })
+          avatar,
+        }),
       });
 
       if (!response.ok) {
         throw new Error("Failed to save profile on server");
       }
 
-      localStorage.setItem(`vedaai_profile_${userEmail}`, JSON.stringify(profile));
-      
+      localStorage.setItem(
+        `vedaai_profile_${userEmail}`,
+        JSON.stringify(profile),
+      );
+
       // Dispatch sync event to instantly update SideBar and NavBar
       window.dispatchEvent(new Event("vedaai_auth_sync"));
 
@@ -157,7 +169,10 @@ export default function ProfilePage() {
     } catch (err) {
       console.error("Failed to save profile:", err);
       // Fallback
-      localStorage.setItem(`vedaai_profile_${userEmail}`, JSON.stringify(profile));
+      localStorage.setItem(
+        `vedaai_profile_${userEmail}`,
+        JSON.stringify(profile),
+      );
       window.dispatchEvent(new Event("vedaai_auth_sync"));
       setShowSuccessNotification(true);
       setTimeout(() => setShowSuccessNotification(false), 3000);
@@ -167,28 +182,41 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="ml-84 w-[70rem] py-4 min-h-[85vh] font-bricolage text-black flex flex-col gap-6">
+    <div className="lg:ml-84 lg:w-[70rem] w-full px-4 lg:px-0 py-4 lg:py-6 font-bricolage text-black min-h-[80vh] flex flex-col gap-5 lg:gap-6 pb-24 relative">
       
-      {/* Page Header */}
-      <div className="flex flex-col gap-1">
+      {/* 📱 Mobile Page Title & Back Arrow */}
+      <div className="flex lg:hidden items-center gap-4 mt-2 px-1">
+        <button
+          onClick={() => router.back()}
+          className="bg-[#EAEAEA] hover:bg-zinc-200 text-zinc-800 p-2.5 rounded-full cursor-pointer transition-colors shadow-sm flex items-center justify-center h-10 w-10 active:scale-95"
+        >
+          <ArrowLeft className="w-5 h-5 stroke-[2.5]" />
+        </button>
+        <h2 className="text-xl font-bold tracking-tight text-zinc-800">Teacher Profile</h2>
+      </div>
+
+      {/* Page Header (Desktop only) */}
+      <div className="hidden lg:flex flex-col gap-1">
         <div className="flex items-center gap-3">
           <span className="w-3.5 h-3.5 rounded-full bg-orange-500 border-2 border-white shadow-md animate-pulse"></span>
-          <h2 className="text-2xl font-black text-black tracking-tight">Teacher Profile Settings</h2>
+          <h2 className="text-2xl font-black text-black tracking-tight">
+            Teacher Profile Settings
+          </h2>
         </div>
         <p className="text-[#5E5E5ECC] text-sm pl-6.5">
-          Configure your professional identity, school details, and printable test headers.
+          Configure your professional identity, school details, and printable
+          test headers.
         </p>
       </div>
 
       {/* Main Settings Card */}
-      <div className="bg-white rounded-3xl p-8 border border-zinc-200/50 shadow-[0_4px_40px_rgba(0,0,0,0.02)] flex flex-col md:flex-row gap-8 relative overflow-hidden">
-        
+      <div className="bg-white rounded-3xl p-5 lg:p-8 border border-zinc-200/50 shadow-[0_4px_40px_rgba(0,0,0,0.02)] flex flex-col md:flex-row gap-8 relative overflow-hidden">
         {/* Left Side: Avatar selector box */}
-        <div className="flex flex-col items-center gap-6 w-full md:w-1/3 border-r border-zinc-100 pr-0 md:pr-8">
+        <div className="flex flex-col items-center gap-6 w-full md:w-1/3 border-b md:border-b-0 md:border-r border-zinc-100 pb-6 md:pb-0 md:pr-8">
           <div className="relative group w-32 h-32 rounded-full overflow-hidden border-4 border-zinc-100 shadow-md">
-            <Image 
-              src={avatar} 
-              alt="Profile Avatar" 
+            <Image
+              src={avatar}
+              alt="Profile Avatar"
               fill
               className="object-cover"
               priority
@@ -216,24 +244,28 @@ export default function ProfilePage() {
               <UploadCloud className="w-3.5 h-3.5" />
               Upload Custom Photo
             </button>
-            <p className="text-[10px] text-zinc-400 italic">PNG or JPEG up to 5MB</p>
+            <p className="text-[10px] text-zinc-400 italic">
+              PNG or JPEG up to 5MB
+            </p>
           </div>
 
           {/* Quick presets selection grid */}
           <div className="w-full">
-            <h4 className="text-[11px] font-bold uppercase tracking-wider text-zinc-400 text-center mb-3">Or choose preset:</h4>
-            <div className="flex justify-center gap-3.5">
+            <h4 className="text-[11px] font-bold uppercase tracking-wider text-zinc-400 text-center mb-3">
+              Or choose preset:
+            </h4>
+            <div className="flex justify-center flex-wrap gap-3.5">
               {presetAvatars.map((url, idx) => (
                 <button
                   key={idx}
                   onClick={() => setAvatar(url)}
-                  className={`relative w-12 h-12 rounded-full overflow-hidden border-2 cursor-pointer transition-all hover:scale-105 active:scale-95 ${avatar === url ? "border-orange-500 shadow-sm" : "border-zinc-200"}`}
+                  className={`relative w-11 h-11 rounded-full overflow-hidden border-2 cursor-pointer transition-all hover:scale-105 active:scale-95 ${avatar === url ? "border-orange-500 shadow-sm" : "border-zinc-200"}`}
                 >
-                  <Image 
-                    src={url} 
-                    alt={`Preset Avatar ${idx}`} 
-                    fill 
-                    className="object-cover" 
+                  <Image
+                    src={url}
+                    alt={`Preset Avatar ${idx}`}
+                    fill
+                    className="object-cover"
                   />
                 </button>
               ))}
@@ -244,20 +276,24 @@ export default function ProfilePage() {
         {/* Right Side: Form inputs */}
         <div className="flex-1 flex flex-col gap-6 justify-between">
           <div className="flex flex-col gap-5">
-            
             {/* Success alert message overlay */}
             {showSuccessNotification && (
               <div className="bg-emerald-50 text-emerald-700 border border-emerald-200/50 rounded-2xl p-4 flex items-center gap-3 animate-in fade-in slide-in-from-top-4 duration-200">
                 <CheckCircle2 className="w-5 h-5 text-emerald-500" />
                 <div className="text-sm font-semibold">
-                  Profile updated successfully! Live sidebar and headers have synced.
+                  Profile updated successfully! Live sidebar and headers have
+                  synced.
                 </div>
               </div>
             )}
 
             <div className="flex flex-col gap-1 border-b border-zinc-100 pb-3">
-              <h3 className="text-lg font-bold text-zinc-900">Personal Information</h3>
-              <p className="text-xs text-zinc-400">These details are shown in the headers of created papers.</p>
+              <h3 className="text-lg font-bold text-zinc-900">
+                Personal Information
+              </h3>
+              <p className="text-xs text-zinc-400">
+                These details are shown in the headers of created papers.
+              </p>
             </div>
 
             {/* Name Input */}
@@ -304,21 +340,20 @@ export default function ProfilePage() {
                 className="w-full bg-zinc-50 focus:bg-white outline-none border border-zinc-200 focus:border-zinc-300 transition-all px-4 py-3.5 rounded-xl font-semibold text-sm text-zinc-800"
               />
             </div>
-
           </div>
 
           {/* Action Row */}
-          <div className="flex justify-end gap-3 mt-4 border-t border-zinc-100 pt-5">
+          <div className="flex flex-col sm:flex-row justify-end gap-3 mt-4 border-t border-zinc-100 pt-5">
             <button
               onClick={() => router.push("/assignment")}
-              className="bg-zinc-100 hover:bg-zinc-200 text-zinc-700 font-bold text-sm px-6 py-3.5 rounded-full transition-colors cursor-pointer active:scale-95"
+              className="bg-zinc-100 hover:bg-zinc-200 text-zinc-700 font-bold text-sm px-6 py-3.5 rounded-full transition-colors cursor-pointer active:scale-95 text-center order-2 sm:order-1"
             >
               Cancel
             </button>
             <button
               onClick={handleSave}
               disabled={isSaving}
-              className="flex items-center gap-2 bg-zinc-900 hover:bg-black text-white font-bold text-sm px-7 py-3.5 rounded-full transition-all active:scale-[0.98] shadow-md hover:shadow-lg cursor-pointer disabled:bg-zinc-400"
+              className="flex items-center justify-center gap-2 bg-zinc-900 hover:bg-black text-white font-bold text-sm px-7 py-3.5 rounded-full transition-all active:scale-[0.98] shadow-md hover:shadow-lg cursor-pointer disabled:bg-zinc-400 order-1 sm:order-2"
             >
               {isSaving ? (
                 <>
@@ -333,11 +368,8 @@ export default function ProfilePage() {
               )}
             </button>
           </div>
-
         </div>
-
       </div>
-
     </div>
   );
 }

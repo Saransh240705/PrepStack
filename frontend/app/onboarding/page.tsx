@@ -1,20 +1,21 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { BACKEND_URL } from "../config";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { 
-  User, 
-  School, 
-  MapPin, 
-  GraduationCap, 
+import {
+  User,
+  School,
+  MapPin,
+  GraduationCap,
   BookOpen,
-  ArrowRight, 
-  ArrowLeft, 
-  Check, 
+  ArrowRight,
+  ArrowLeft,
+  Check,
   Sparkles,
   Loader2,
-  CheckCircle2
+  CheckCircle2,
 } from "lucide-react";
 
 export default function OnboardingPage() {
@@ -53,18 +54,36 @@ export default function OnboardingPage() {
     "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=60", // Educator Male 2
   ];
 
-  const gradeOptions = ["Elementary (1-5)", "Middle School (6-8)", "High School (9-10)", "Senior Secondary (11-12)", "Undergraduate"];
-  const subjectOptions = ["Mathematics", "Physics", "Chemistry", "Biology", "English Literature", "Social Sciences", "Technology (SNT)"];
+  const gradeOptions = [
+    "Elementary (1-5)",
+    "Middle School (6-8)",
+    "High School (9-10)",
+    "Senior Secondary (11-12)",
+    "Undergraduate",
+  ];
+  const subjectOptions = [
+    "Mathematics",
+    "Physics",
+    "Chemistry",
+    "Biology",
+    "English Literature",
+    "Social Sciences",
+    "Technology (SNT)",
+  ];
 
   const handleToggleGrade = (grade: string) => {
-    setGradeFocus((prev) => 
-      prev.includes(grade) ? prev.filter((item) => item !== grade) : [...prev, grade]
+    setGradeFocus((prev) =>
+      prev.includes(grade)
+        ? prev.filter((item) => item !== grade)
+        : [...prev, grade],
     );
   };
 
   const handleToggleSubject = (subject: string) => {
-    setSubjectFocus((prev) => 
-      prev.includes(subject) ? prev.filter((item) => item !== subject) : [...prev, subject]
+    setSubjectFocus((prev) =>
+      prev.includes(subject)
+        ? prev.filter((item) => item !== subject)
+        : [...prev, subject],
     );
   };
 
@@ -95,21 +114,21 @@ export default function OnboardingPage() {
       avatar,
       roleTitle,
       gradeFocus,
-      subjectFocus
+      subjectFocus,
     };
 
     try {
-      const response = await fetch("http://localhost:5001/api/auth/onboard", {
+      const response = await fetch(`${BACKEND_URL}/api/auth/onboard`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           schoolName: schoolName || "Navyug Convent School",
           schoolAddress: schoolAddress || "New Delhi",
           role: roleTitle,
-        })
+        }),
       });
 
       if (!response.ok) {
@@ -117,17 +136,23 @@ export default function OnboardingPage() {
       }
 
       // Synchronize local storage for instant sync backward compatibility
-      localStorage.setItem(`vedaai_profile_${userEmail}`, JSON.stringify(updatedProfile));
+      localStorage.setItem(
+        `vedaai_profile_${userEmail}`,
+        JSON.stringify(updatedProfile),
+      );
       localStorage.setItem(`vedaai_onboarded_${userEmail}`, "true");
-      
+
       // Dispatch sync event to instantly update SideBar and NavBar
       window.dispatchEvent(new Event("vedaai_auth_sync"));
-      
+
       router.push("/assignment");
     } catch (err) {
       console.error("Onboarding error:", err);
       // Fallback gracefully to localStorage
-      localStorage.setItem(`vedaai_profile_${userEmail}`, JSON.stringify(updatedProfile));
+      localStorage.setItem(
+        `vedaai_profile_${userEmail}`,
+        JSON.stringify(updatedProfile),
+      );
       localStorage.setItem(`vedaai_onboarded_${userEmail}`, "true");
       window.dispatchEvent(new Event("vedaai_auth_sync"));
       router.push("/assignment");
@@ -138,23 +163,24 @@ export default function OnboardingPage() {
 
   return (
     <div className="min-h-screen w-full flex flex-col items-center justify-center bg-[#fafafa] font-bricolage text-black relative p-4 md:p-6 overflow-hidden">
-      
       {/* Dynamic Background Glows */}
       <div className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] rounded-full bg-zinc-100/50 blur-3xl -z-10"></div>
       <div className="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-[400px] h-[400px] rounded-full bg-orange-50/20 blur-3xl -z-10"></div>
 
       {/* Main Card Container */}
       <div className="w-full max-w-[550px] bg-white rounded-3xl p-8 md:p-10 border border-zinc-200/60 shadow-[0_12px_45px_rgba(0,0,0,0.03)] flex flex-col gap-8 relative">
-        
         {/* Stepper progress indicator */}
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between text-xs font-bold text-zinc-400 uppercase tracking-widest pl-1">
             <span>Setup Educator Profile</span>
             <span className="text-black">Step {currentStep} of 3</span>
           </div>
-          
+
           <div className="flex gap-2 h-1.5 w-full bg-zinc-100 rounded-full overflow-hidden">
-            <div className={`h-full bg-black rounded-full transition-all duration-500`} style={{ width: `${(currentStep / 3) * 100}%` }}></div>
+            <div
+              className={`h-full bg-black rounded-full transition-all duration-500`}
+              style={{ width: `${(currentStep / 3) * 100}%` }}
+            ></div>
           </div>
         </div>
 
@@ -162,34 +188,49 @@ export default function OnboardingPage() {
         <div className="text-center md:text-left">
           {currentStep === 1 && (
             <>
-              <h2 className="text-2xl font-black text-zinc-950 uppercase tracking-tight">Personalize Your Profile</h2>
-              <p className="text-zinc-500 text-sm mt-1">Set your teacher credentials and pick a beautiful educator avatar.</p>
+              <h2 className="text-2xl font-black text-zinc-950 uppercase tracking-tight">
+                Personalize Your Profile
+              </h2>
+              <p className="text-zinc-500 text-sm mt-1">
+                Set your teacher credentials and pick a beautiful educator
+                avatar.
+              </p>
             </>
           )}
           {currentStep === 2 && (
             <>
-              <h2 className="text-2xl font-black text-zinc-950 uppercase tracking-tight">Branding & School Setup</h2>
-              <p className="text-zinc-500 text-sm mt-1">Provide your school details to brand generated A4 sheets dynamically.</p>
+              <h2 className="text-2xl font-black text-zinc-950 uppercase tracking-tight">
+                Branding & School Setup
+              </h2>
+              <p className="text-zinc-500 text-sm mt-1">
+                Provide your school details to brand generated A4 sheets
+                dynamically.
+              </p>
             </>
           )}
           {currentStep === 3 && (
             <>
-              <h2 className="text-2xl font-black text-zinc-950 uppercase tracking-tight">Academic Specialization</h2>
-              <p className="text-zinc-500 text-sm mt-1">Select your teaching focus so Gemini can calibrate questions appropriately.</p>
+              <h2 className="text-2xl font-black text-zinc-950 uppercase tracking-tight">
+                Academic Specialization
+              </h2>
+              <p className="text-zinc-500 text-sm mt-1">
+                Select your teaching focus so Gemini can calibrate questions
+                appropriately.
+              </p>
             </>
           )}
         </div>
 
         {/* STEP PANELS CONTAINER */}
         <div className="min-h-[260px] flex flex-col justify-center">
-          
           {/* STEP 1: Personal Details & Avatars Presets */}
           {currentStep === 1 && (
             <div className="flex flex-col gap-5 animate-in fade-in duration-300">
-              
               {/* Full Name field */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-bold text-zinc-700 pl-1 uppercase tracking-wide">Educator Name</label>
+                <label className="text-xs font-bold text-zinc-700 pl-1 uppercase tracking-wide">
+                  Educator Name
+                </label>
                 <div className="relative">
                   <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-zinc-400" />
                   <input
@@ -205,7 +246,9 @@ export default function OnboardingPage() {
 
               {/* Title / Role selection */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-bold text-zinc-700 pl-1 uppercase tracking-wide">Role / Position</label>
+                <label className="text-xs font-bold text-zinc-700 pl-1 uppercase tracking-wide">
+                  Role / Position
+                </label>
                 <div className="relative">
                   <GraduationCap className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-zinc-400" />
                   <input
@@ -221,7 +264,9 @@ export default function OnboardingPage() {
 
               {/* Avatar Selector Presets Grid */}
               <div className="flex flex-col gap-2 mt-1">
-                <label className="text-xs font-bold text-zinc-700 pl-1 uppercase tracking-wide">Select Profile Avatar</label>
+                <label className="text-xs font-bold text-zinc-700 pl-1 uppercase tracking-wide">
+                  Select Profile Avatar
+                </label>
                 <div className="flex items-center gap-3.5 py-1">
                   {avatarPresets.map((preset, idx) => {
                     const isSelected = avatar === preset;
@@ -230,14 +275,14 @@ export default function OnboardingPage() {
                         key={idx}
                         onClick={() => setAvatar(preset)}
                         className={`relative w-14 h-14 rounded-full overflow-hidden border-2 cursor-pointer transition-all ${
-                          isSelected 
-                            ? "border-black scale-108 shadow-md" 
+                          isSelected
+                            ? "border-black scale-108 shadow-md"
                             : "border-zinc-200/60 opacity-60 hover:opacity-90"
                         }`}
                       >
-                        <Image 
-                          src={preset} 
-                          alt={`Preset ${idx + 1}`} 
+                        <Image
+                          src={preset}
+                          alt={`Preset ${idx + 1}`}
                           fill
                           className="object-cover"
                         />
@@ -251,17 +296,17 @@ export default function OnboardingPage() {
                   })}
                 </div>
               </div>
-
             </div>
           )}
 
           {/* STEP 2: School Branding Input Fields */}
           {currentStep === 2 && (
             <div className="flex flex-col gap-5 animate-in fade-in duration-300">
-              
               {/* School Name Field */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-bold text-zinc-700 pl-1 uppercase tracking-wide">School / Institution Name</label>
+                <label className="text-xs font-bold text-zinc-700 pl-1 uppercase tracking-wide">
+                  School / Institution Name
+                </label>
                 <div className="relative">
                   <School className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-zinc-400" />
                   <input
@@ -277,7 +322,9 @@ export default function OnboardingPage() {
 
               {/* School Address Field */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-bold text-zinc-700 pl-1 uppercase tracking-wide">School Location / Address</label>
+                <label className="text-xs font-bold text-zinc-700 pl-1 uppercase tracking-wide">
+                  School Location / Address
+                </label>
                 <div className="relative">
                   <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-zinc-400" />
                   <input
@@ -292,16 +339,17 @@ export default function OnboardingPage() {
               </div>
 
               <div className="text-xs text-zinc-400 italic bg-zinc-50 p-4 border border-zinc-100 rounded-2xl leading-normal mt-2 pl-4 border-l-4 border-l-zinc-700">
-                ⚠️ **Branding Impact**: These fields directly customize the centered letterhead in your generated question sheets (e.g. "NAVYUG CONVENT SCHOOL, NEW DELHI" printed on top of the assignment).
+                ⚠️ **Branding Impact**: These fields directly customize the
+                centered letterhead in your generated question sheets (e.g.
+                "NAVYUG CONVENT SCHOOL, NEW DELHI" printed on top of the
+                assignment).
               </div>
-
             </div>
           )}
 
           {/* STEP 3: Badge selectors for academic target criteria */}
           {currentStep === 3 && (
             <div className="flex flex-col gap-5 animate-in fade-in duration-300">
-              
               {/* Grade ranges selection */}
               <div className="flex flex-col gap-2">
                 <label className="text-xs font-bold text-zinc-700 pl-1 uppercase tracking-wide flex items-center gap-1.5">
@@ -317,8 +365,8 @@ export default function OnboardingPage() {
                         type="button"
                         onClick={() => handleToggleGrade(grade)}
                         className={`text-xs font-bold px-3.5 py-2 rounded-full border transition-all cursor-pointer ${
-                          isSelected 
-                            ? "bg-black border-black text-white" 
+                          isSelected
+                            ? "bg-black border-black text-white"
                             : "bg-white border-zinc-200 text-zinc-600 hover:border-zinc-400"
                         }`}
                       >
@@ -344,8 +392,8 @@ export default function OnboardingPage() {
                         type="button"
                         onClick={() => handleToggleSubject(subject)}
                         className={`text-xs font-bold px-3.5 py-2 rounded-full border transition-all cursor-pointer ${
-                          isSelected 
-                            ? "bg-black border-black text-white" 
+                          isSelected
+                            ? "bg-black border-black text-white"
                             : "bg-white border-zinc-200 text-zinc-600 hover:border-zinc-400"
                         }`}
                       >
@@ -355,10 +403,8 @@ export default function OnboardingPage() {
                   })}
                 </div>
               </div>
-
             </div>
           )}
-
         </div>
 
         {/* BOTTOM ACTION NAVIGATION CONTROL ROW */}
@@ -399,9 +445,7 @@ export default function OnboardingPage() {
             )}
           </button>
         </div>
-
       </div>
-
     </div>
   );
 }

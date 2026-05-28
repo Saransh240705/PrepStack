@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import SideBar from "./SideBar";
 import NavBar from "./NavBar";
+import BottomNavBar from "./BottomNavBar";
 import { Loader2 } from "lucide-react";
 
 export default function AppLayoutWrapper({ children }: { children: React.ReactNode }) {
@@ -86,6 +87,7 @@ export default function AppLayoutWrapper({ children }: { children: React.ReactNo
       <SideBar />
       <NavBar />
       {children}
+      <BottomNavBar />
     </>
   );
 }

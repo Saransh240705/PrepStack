@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { BACKEND_URL } from "../config";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { 
@@ -55,7 +56,7 @@ export default function LoginPage() {
         ? { email, password } 
         : { email, password, fullName };
 
-      const response = await fetch(`http://localhost:5001/api/auth/${endpoint}`, {
+      const response = await fetch(`${BACKEND_URL}/api/auth/${endpoint}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
