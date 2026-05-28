@@ -24,6 +24,8 @@ node_modules/
 /frontend/out/
 /build
 /dist
+**/dist/
+**/build/
 
 # Diagnostic Scripts & Upload Test Dumps
 **/backend/test-*.pdf
