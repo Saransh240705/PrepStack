@@ -3,9 +3,9 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { User } from "../models/User.model";
 import { authenticateToken, AuthRequest } from "../config/auth.middleware";
+import { JWT_SECRET } from "../config/jwt";
 
 const router = Router();
-const JWT_SECRET = process.env.JWT_SECRET as string;
 
 // Helper to generate JWT token
 const generateToken = (userId: string, email: string): string => {

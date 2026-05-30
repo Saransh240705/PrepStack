@@ -1,4 +1,9 @@
-const parseRedisUrl = (url: string) => {
+const parseRedisUrl = (rawUrl: string) => {
+  // Defensive: strip accidental "REDIS_URL=" prefix and trailing whitespace
+  let url = rawUrl.trim();
+  if (url.startsWith("REDIS_URL=")) {
+    url = url.substring("REDIS_URL=".length).trim();
+  }
   const parsed = new URL(url);
   return {
     host: parsed.hostname,

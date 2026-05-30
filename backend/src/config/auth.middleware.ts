@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-
-const JWT_SECRET = process.env.JWT_SECRET || "vedaai-super-secret-jwt-key-2026";
+import { JWT_SECRET } from "./jwt";
 
 export interface AuthRequest extends Request {
   user?: {

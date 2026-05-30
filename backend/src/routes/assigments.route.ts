@@ -3,11 +3,10 @@ import z from "zod";
 import { Assignment } from "../models/Assignment.model";
 import { GeneratedPaper } from "../models/GeneratedPaper.model";
 import { addGenerationJob } from "../queues/generationQueue";
-
 import jwt from "jsonwebtoken";
+import { JWT_SECRET } from "../config/jwt";
 
 const router = Router();
-const JWT_SECRET = process.env.JWT_SECRET || "vedaai-super-secret-jwt-key-2026";
 
 const getUserEmail = (req: Request): string | undefined => {
   const authHeader = req.headers["authorization"];
@@ -19,11 +18,10 @@ const getUserEmail = (req: Request): string | undefined => {
         return decoded.email;
       }
     } catch (e) {
-      // Ignore token verification errors and fall back
+      // Ignore token verification errors
     }
   }
-  const legacyEmail = req.headers["x-user-email"];
-  return typeof legacyEmail === "string" ? legacyEmail : undefined;
+  return undefined;
 };
 
 const createAssignmentSchma = z.object({
@@ -43,7 +41,11 @@ const createAssignmentSchma = z.object({
 router.post("/", async (req: Request, res: Response) => {
   try {
     const body = createAssignmentSchma.parse(req.body);
-    const email = getUserEmail(req) || body.createdBy;
+    const email = getUserEmail(req);
+
+    if (!email) {
+      return res.status(401).json({ error: "Unauthorized. Valid authentication token required." });
+    }
 
     const assignment = await Assignment.create({
       ...body,
@@ -69,8 +71,10 @@ router.post("/", async (req: Request, res: Response) => {
 router.get("/", async (req: Request, res: Response) => {
   try {
     const userEmail = getUserEmail(req);
-    const query = userEmail ? { createdBy: userEmail } : {};
-    const assignments = await Assignment.find(query).sort({ createdAt: -1 });
+    if (!userEmail) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    const assignments = await Assignment.find({ createdBy: userEmail }).sort({ createdAt: -1 });
     res.json(assignments);
   } catch (error) {
     console.error("Error fetching assignments:", error);

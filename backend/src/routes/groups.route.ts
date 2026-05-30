@@ -1,9 +1,9 @@
 import { Router, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { Group } from "../models/Group.model";
+import { JWT_SECRET } from "../config/jwt";
 
 const router = Router();
-const JWT_SECRET = process.env.JWT_SECRET || "vedaai-super-secret-jwt-key-2026";
 
 const getUserEmail = (req: Request): string | undefined => {
   const authHeader = req.headers["authorization"];
@@ -18,8 +18,7 @@ const getUserEmail = (req: Request): string | undefined => {
       // Ignore token verification errors
     }
   }
-  const legacyEmail = req.headers["x-user-email"];
-  return typeof legacyEmail === "string" ? legacyEmail : undefined;
+  return undefined;
 };
 
 // GET /api/groups - Get all groups for the logged-in teacher

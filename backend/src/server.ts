@@ -12,10 +12,24 @@ import authRoutes from "./routes/auth.route";
 import groupRoutes from "./routes/groups.route";
 import templateRoutes from "./routes/templates.route";
 
+const ALLOWED_ORIGINS = [
+  "http://localhost:3000",
+  "http://localhost:5173",
+  "https://vedaai-mkhh.onrender.com",
+  "https://veda-ai-sage-nine.vercel.app",
+];
+
 const app = express();
 app.use(
   cors({
-    origin: true,
+    origin: (origin, callback) => {
+      // Allow requests with no origin (e.g., server-to-server, mobile apps, curl)
+      if (!origin || ALLOWED_ORIGINS.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   }),
 );
