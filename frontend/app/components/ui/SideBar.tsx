@@ -27,9 +27,11 @@ const SideBar = () => {
   useEffect(() => {
     const fetchCount = async () => {
       try {
+        const token = localStorage.getItem("vedaai_auth_token") || "";
         const userEmail = localStorage.getItem("vedaai_user_email") || "";
         const res = await fetch(`${BACKEND_URL}/api/assignments`, {
           headers: {
+            "Authorization": `Bearer ${token}`,
             "x-user-email": userEmail,
           },
         });
