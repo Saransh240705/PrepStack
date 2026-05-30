@@ -28,6 +28,7 @@ export const setupSocket = (server: HttpServer) => {
         "http://localhost:3000",
         "http://localhost:5173",
         "https://vedaai-mkhh.onrender.com",
+        "https://veda-ai-sage-nine.vercel.app",
       ],
       methods: ["GET", "POST"],
       credentials: true,
