@@ -368,6 +368,45 @@ export default function AssignmentOutputPage({ params }: PageProps) {
     };
   }, [id, status]);
 
+  // Polling fallback: periodically check assignment status in case Socket.IO misses the event
+  useEffect(() => {
+    if (status === "completed" || status === "failed") return;
+
+    const poll = async () => {
+      try {
+        const token = localStorage.getItem("vedaai_auth_token") || "";
+        const res = await fetch(`${BACKEND_URL}/api/assignments/${id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+
+        if (data.status === "completed") {
+          setStatus("completed");
+          // Fetch the generated paper
+          try {
+            const resPaper = await fetch(`${BACKEND_URL}/api/papers/${id}`, {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            if (resPaper.ok) {
+              const paperData = await resPaper.json();
+              setPaper(paperData);
+            }
+          } catch (err) {
+            console.error("Polling: Failed to fetch paper:", err);
+          }
+        } else if (data.status === "failed") {
+          setStatus("failed");
+        }
+      } catch (err) {
+        console.error("Polling: Failed to check assignment status:", err);
+      }
+    };
+
+    const interval = setInterval(poll, 8000);
+    return () => clearInterval(interval);
+  }, [id, status]);
+
   // Simulated Stepper Progress ticks during loading
   useEffect(() => {
     if (status === "processing" || status === "pending") {
