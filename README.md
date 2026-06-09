@@ -1,6 +1,6 @@
-# VedaAI - AI-Powered Curriculum & Assignment Engineering Platform
+# PrepStack - AI-Powered Curriculum & Assignment Engineering Platform
 
-VedaAI is a high-fidelity, premium SaaS platform designed for educators and teachers to instantly formulate curriculum-aligned question papers and solution schemes. By parsing raw course materials (PDFs, Microsoft Word `.docx` files, and images) and leveraging **Gemini 2.5 Flash**, VedaAI generates beautiful, printable A4 question sheets with institution-branded letterheads, custom visual badges, and separated teacher answer keys.
+PrepStack is a high-fidelity, premium SaaS platform designed for educators and teachers to instantly formulate curriculum-aligned question papers and solution schemes. By parsing raw course materials (PDFs, Microsoft Word `.docx` files, and images) and leveraging **Gemini 2.5 Flash**, PrepStack generates beautiful, printable A4 question sheets with institution-branded letterheads, custom visual badges, and separated teacher answer keys.
 
 ---
 
@@ -10,7 +10,7 @@ VedaAI is a high-fidelity, premium SaaS platform designed for educators and teac
 *   **Dual-Column Authentication & Interactive Onboarding**:
     *   Sleek Login / Sign Up portal featuring password visibility micro-interactions and a full-bleed visual grid showcasing branding graphics.
     *   A 3-step Onboarding wizard allowing educators to customize their preset avatar, specify their institution name and location, and toggle target teaching subjects and grade filters.
-*   **Strict Multi-User Session Isolation**: Dynamically scopes assignments and profile parameters utilizing account-specific tokens (`vedaai_profile_${userEmail}` and `x-user-email` headers). Multiple teachers can test the same browser sandbox without data leakage or skipped onboarding steps.
+*   **Strict Multi-User Session Isolation**: Dynamically scopes assignments and profile parameters utilizing account-specific tokens (`PrepStack_profile_${userEmail}` and `x-user-email` headers). Multiple teachers can test the same browser sandbox without data leakage or skipped onboarding steps.
 *   **Multi-Format Document Parsing**: Uses magic-byte binary header matching and the `mammoth` parser to dynamically extract curriculum text from uploaded PDFs, images, and `.docx` structures.
 *   **Resilient Queued Generation**: Implements a robust background task pipeline utilizing **BullMQ** and **Redis** to execute generation jobs, supported by an exponential backoff wrapper (`generateWithRetry`) to dynamically handle rate limits or transient upstream 503 outages.
 *   **Premium Printable A4 PDF Exports**: 
@@ -22,10 +22,10 @@ VedaAI is a high-fidelity, premium SaaS platform designed for educators and teac
 
 ## 🏗️ Monorepo Architecture
 
-VedaAI is organized as a clean, unified monorepo:
+PrepStack is organized as a clean, unified monorepo:
 
 ```text
-VedaAI/
+PrepStack/
 ├── backend/                  # Express.js server & BullMQ background worker
 │   ├── src/
 │   │   ├── config/           # Mongoose DB & Redis connections
